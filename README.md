@@ -16,7 +16,7 @@ make -j 8
 
 cd ../../examples/
 
-git clone https://github.com/violatingcp/grpc-trt-fgpa.git
+git clone https://github.com/drankincms/grpc-trt-fgpa.git
 
 cd grpc-trt-fgpa
 
