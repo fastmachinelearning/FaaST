@@ -21,3 +21,5 @@ git clone https://github.com/violatingcp/grpc-trt-fgpa.git
 cd grpc-trt-fgpa
 
 make
+
+./server
