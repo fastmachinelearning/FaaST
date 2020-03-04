@@ -28,6 +28,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     StatusResponse* reply
 		     ) override {
 
+    //std::cout << "In Status" << std::endl;
     auto server_status = reply->mutable_server_status();
     server_status->set_id("inference:0");
     auto& model_status  = *server_status->mutable_model_status();
@@ -55,6 +56,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     InferResponse* reply
 		     ) override {
     
+    //std::cout << "In Infer" << std::endl;
     const std::string& raw = request->raw_input(0);
     const void* lVals = raw.c_str();
     float* lFVals = (float*) lVals;
@@ -85,7 +87,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 };
 
 void Run() {
-  std::string address("0.0.0.0:8001");
+  std::string address("0.0.0.0:8080");
   GRPCServiceImplementation service;
 
   ServerBuilder builder;
