@@ -22,4 +22,4 @@ cd grpc-trt-fgpa
 
 make
 
-./server
+./server hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin
