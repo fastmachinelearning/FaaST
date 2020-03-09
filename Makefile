@@ -1,9 +1,9 @@
 #note the compile for below needs to be pointed in the right direction
 LDFLAGS = -Wl,-rpath,/usr/local/lib\
-
  -L/usr/local/lib \
  -lgrpc++_unsecure -lgrpc -lupb -lprotobuf -lpthread -lgrpc_unsecure -lgpr \
  -lcares -lgrpc_plugin_support -lssl -lcrypto  -lz -labsl_strings -labsl_base -labsl_throw_delegate \
+ $(opencl_LDFLAGS)\
  -lnsl -laddress_sorting -ldl -lm
 
 COMMON_REPO := ./hls4ml_c/
@@ -17,8 +17,8 @@ HLS4ML_PROJ_TYPE := DENSE
 
 CXX = g++
 CPPFLAGS += `pkg-config --cflags protobuf grpc`
-CPPFLAGS += -I$(CURDIR)/../include
-CXXFLAGS += -std=c++11
+CPPFLAGS += -I$(CURDIR)/../../include -I$(COMMON_REPO)/src/ -I$(COMMON_REPO)/src/nnet_utils/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) -DIS_$(HLS4ML_PROJ_TYPE) -DWEIGHTS_DIR=$(COMMON_REPO)/src/weights/ -I$(XILINX_VIVADO)/include/ -I$(XILINX_SDACCEL)/include/ -Wno-unknown-pragmas
+CXXFLAGS := -std=c++11
 
 
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
