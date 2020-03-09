@@ -222,15 +222,17 @@ void Run(std::string xclbinFilename) {
   cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
           vector_size_out_bytes, service.source_hw_results.data());
 
+  service.inBufVec.clear();
+  service.outBufVec.clear();
   service.inBufVec.push_back(buffer_in);
   service.outBufVec.push_back(buffer_output);
 
   cl::Kernel krnl_alveo_hls4ml(service.program,"alveo_hls4ml");
+  service.krnl_xil = krnl_alveo_hls4ml;
 
   int narg = 0;
-  krnl_alveo_hls4ml.setArg(narg++, buffer_in);
-  krnl_alveo_hls4ml.setArg(narg++, buffer_output);
-  service.krnl_xil = krnl_alveo_hls4ml;
+  service.krnl_xil.setArg(narg++, buffer_in);
+  service.krnl_xil.setArg(narg++, buffer_output);
 
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on port: " << address << std::endl;
