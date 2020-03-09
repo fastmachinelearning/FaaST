@@ -1,36 +1,10 @@
 #note the compile for below needs to be pointed in the right direction
 LDFLAGS = -Wl,-rpath,/usr/local/lib\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libgrpc++_unsecure.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libgrpc.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libupb.a\
- /usr/local/lib/libprotobuf.a\
- -lpthread /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libgrpc_unsecure.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libgpr.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/cares/cares/lib/libcares.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libgrpc_plugin_support.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/boringssl-with-bazel/libssl.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/boringssl-with-bazel/libcrypto.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/zlib/libz.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/strings/libabsl_strings.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/base/libabsl_base.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/base/libabsl_throw_delegate.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/base/libabsl_log_severity.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/base/libabsl_raw_logging_internal.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/hash/libabsl_hash.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/time/libabsl_time.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/time/libabsl_civil_time.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/time/libabsl_time_zone.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/strings/libabsl_str_format_internal.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/strings/libabsl_strings_internal.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/types/libabsl_bad_optional_access.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/types/libabsl_bad_any_cast_impl.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/types/libabsl_bad_variant_access.a\
- /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/third_party/abseil-cpp/absl/numeric/libabsl_int128.a\
- -lnsl /storage/local/data1/home/drankin/HCAL_GRPC/grpc/cmake/build/libaddress_sorting.a\
- $(opencl_LDFLAGS)\
- -ldl -lrt -lm 
- #/storage/local/data1/home/drankin/HCAL_GRPC/local/protobuf-trt/lib64/libprotobuf-trt.a\
- #/usr/local/lib/libcares.so.2.3.0\
+
+ -L/usr/local/lib \
+ -lgrpc++_unsecure -lgrpc -lupb -lprotobuf -lpthread -lgrpc_unsecure -lgpr \
+ -lcares -lgrpc_plugin_support -lssl -lcrypto  -lz -labsl_strings -labsl_base -labsl_throw_delegate \
+ -lnsl -laddress_sorting -ldl -lm
 
 COMMON_REPO := ./hls4ml_c/
 
@@ -43,8 +17,9 @@ HLS4ML_PROJ_TYPE := DENSE
 
 CXX = g++
 CPPFLAGS += `pkg-config --cflags protobuf grpc`
-CPPFLAGS += -I/storage/local/data1/home/drankin/HCAL_GRPC/grpc/include/ -I$(COMMON_REPO)/src/ -I$(COMMON_REPO)/src/nnet_utils/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) -DIS_$(HLS4ML_PROJ_TYPE) -DWEIGHTS_DIR=$(COMMON_REPO)/src/weights/ -I$(XILINX_VIVADO)/include/ -I$(XILINX_SDACCEL)/include/ -Wno-unknown-pragmas
-CXXFLAGS := -std=c++11
+CPPFLAGS += -I$(CURDIR)/../include
+CXXFLAGS += -std=c++11
+
 
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
