@@ -1,6 +1,5 @@
 #note the compile for below needs to be pointed in the right direction
 LDFLAGS = -Wl,-rpath,/usr/local/lib\
-
  -L/usr/local/lib \
  -lgrpc++_unsecure -lgrpc -lupb -lprotobuf -lpthread -lgrpc_unsecure -lgpr \
  -lcares -lgrpc_plugin_support -lssl -lcrypto  -lz -labsl_strings -labsl_base -labsl_throw_delegate \
