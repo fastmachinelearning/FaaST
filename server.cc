@@ -77,12 +77,15 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     const InferRequest* request, 
 		     InferResponse* reply
 		     ) override {
+    auto t0 = Clock::now();
+    auto t3 = Clock::now();
+    t0 = Clock::now();
     
     //std::cout << "In Infer" << std::endl;
     const std::string& raw = request->raw_input(0);
     const void* lVals = raw.c_str();
     float* lFVals = (float*) lVals;
-    //output array that is equal to ninputs(15)*batch flot is 4 bits
+    //output array that is equal to ninputs(15)*batch flot is 4 bytes
     unsigned batch_size = raw.size()/15/4;
     reply->mutable_request_status()->set_code(RequestStatusCode::SUCCESS);
     reply->mutable_request_status()->set_server_id("inference:0");
@@ -99,16 +102,24 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     auto t1 = Clock::now();
     auto t2 = Clock::now();
 
-    std::vector<float> pr;
-    for (int istream = 0; istream < (batch_size < STREAMSIZE ? batch_size : STREAMSIZE); istream++) {
+    /*for (int istream = 0; istream < (batch_size < STREAMSIZE ? batch_size : STREAMSIZE); istream++) {
         // Create the test data if no data files found or if end of files has been reached
         for(int j = 0 ; j < DATA_SIZE_IN; j++){
-            source_in[istream*DATA_SIZE_IN+j] = (data_t)(lFVals[istream*DATA_SIZE_IN+j]);
+            data_t tmp = ((unsigned int)(lFVals[istream*DATA_SIZE_IN+j]));
+            source_in[istream*DATA_SIZE_IN+j] = tmp;
         }
         for(int j = 0 ; j < DATA_SIZE_OUT*STREAMSIZE ; j++){
             source_hw_results[j] = 0;
         }
-    }
+    }*/
+    //std::cout<<source_in.size()<<std::endl;
+    //memcpy(&source_in[0], &lFVals[0], sizeof(lFVals));
+    std::copy(lFVals,lFVals+batch_size*DATA_SIZE_IN,source_in.begin());
+    //std::copy(lFVals,lFVals+batch_size*DATA_SIZE_IN,test_vec.begin());
+    //source_in.insert(source_in.end(), &lFVals[0], &lFVals[batch_size*DATA_SIZE_IN]);
+    //source_in.insert(source_in.end(), 0, (STREAMSIZE-batch_size)*DATA_SIZE_IN);
+    std::cout<<source_in[4]<<" "<<(unsigned short)lFVals[4]<<std::endl;
+
 
     t1 = Clock::now();
     // Copy input data to device global memory
@@ -122,7 +133,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     // Check for any errors from the command queue
     q.finish();
     t2 = Clock::now();
-    std::cout << "FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+    std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
 
     //std::cout<<"Quantized predictions: \n";
     //for (int j = 0; j < (batch_size < STREAMSIZE ? batch_size : STREAMSIZE); j++) {
@@ -130,17 +141,29 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     //        std::cout << source_hw_results[j*DATA_SIZE_OUT + k] << " \t";
     //    }
     //}
-    //std::cout << source_hw_results[1];
     //std::cout << std::endl;
     
     //Finally deal with the ouputs
     std::string *outputs1 = reply->add_raw_output();
+    float* lTVals = new float[batch_size];
+    std::copy(source_hw_results.begin(), source_hw_results.begin()+batch_size*DATA_SIZE_OUT, lTVals);
+    std::cout << source_hw_results[0]<<" "<<(unsigned short)lTVals[0]<<std::endl;
     for(unsigned i0 = 0; i0 < batch_size; i0++) { 
-      float* lTVals = new float[1];
-      lTVals[0] = source_hw_results[i0];
-      char* tmp = (char*) lTVals;
+    //  float* lTVals = new float[1];
+    //  lTVals[i0] = source_hw_results[i0];
+      char* tmp = (char*) (lTVals+i0);
       outputs1->append(tmp,sizeof(tmp));
     }
+    //outputs1->append(tmp,sizeof(lTVals));
+
+    //char* tmp = (char*) lTVals;
+    //outputs1->append(tmp, batch_size*sizeof(tmp));
+    //outputs1->append(tmp, sizeof(tmp));
+
+    t3 = Clock::now();
+    std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
+    std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
+    std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " ns" << std::endl;
     return grpc::Status::OK;
   } 
 };
@@ -151,7 +174,7 @@ void Run(std::string xclbinFilename) {
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-  builder.SetMaxMessageSize(640000);
+  builder.SetMaxMessageSize(1000000);
   builder.RegisterService(&service);
   //All the crap that trt inference server runs
   //std::unique_ptr<grpc::ServerCompletionQueue> health_cq = builder.AddCompletionQueue();
@@ -172,12 +195,14 @@ void Run(std::string xclbinFilename) {
   // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
 
   //initialize
-  for(int j = 0 ; j < DATA_SIZE_IN*STREAMSIZE ; j++){
-      service.source_in.push_back((unsigned int)0);
+  /*for(int j = 0 ; j < DATA_SIZE_IN*STREAMSIZE ; j++){
+      service.source_in.push_back((data_t)1);
   }
   for(int j = 0 ; j < DATA_SIZE_OUT*STREAMSIZE ; j++){
-      service.source_hw_results.push_back((unsigned int)0);
-  }
+      service.source_hw_results.push_back((data_t)0);
+  }*/
+  service.source_in.reserve(DATA_SIZE_IN*STREAMSIZE);
+  service.source_hw_results.reserve(DATA_SIZE_OUT*STREAMSIZE);
 
   std::vector<cl::Device> devices = xcl::get_xil_devices();
   cl::Device device = devices[0];
@@ -241,6 +266,7 @@ void Run(std::string xclbinFilename) {
 }
 
 int main(int argc, char** argv) {
+
   std::string xclbinFilename = "";
   if (argc>1) xclbinFilename = argv[1];
   Run(xclbinFilename);
