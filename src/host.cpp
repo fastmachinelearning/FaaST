@@ -110,11 +110,11 @@ int main(int argc, char** argv)
     inBufVec.push_back(buffer_in);
     outBufVec.push_back(buffer_output);
 
-    cl::Kernel krnl_aws_hls4ml(program,"aws_hls4ml");
+    cl::Kernel krnl_alveo_hls4ml(program,"alveo_hls4ml");
 
     int narg = 0;
-    krnl_aws_hls4ml.setArg(narg++, buffer_in);
-    krnl_aws_hls4ml.setArg(narg++, buffer_output);
+    krnl_alveo_hls4ml.setArg(narg++, buffer_in);
+    krnl_alveo_hls4ml.setArg(narg++, buffer_output);
 
     //load input data from text file
     std::ifstream fin(datadir+"/tb_input_features.dat");
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
         // Launch the Kernel
         // For HLS kernels global and local size is always (1,1,1). So, it is recommended
         // to always use enqueueTask() for invoking HLS kernel
-        q.enqueueTask(krnl_aws_hls4ml);
+        q.enqueueTask(krnl_alveo_hls4ml);
         // Copy Result from Device Global Memory to Host Local Memory
         q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
         // Check for any errors from the command queue
@@ -204,7 +204,7 @@ int main(int argc, char** argv)
             }
             std::cout << std::endl;
         }
-        std::cout<<"Quantized predictions: \n";
+        /*std::cout<<"Quantized predictions: \n";
         for (int j = 0 ; j < COMPSTREAMSIZE ; j++){
             for (int k = 0 ; k < COMPRESSION ; k++){
 	      data_t tmp;
@@ -213,7 +213,7 @@ int main(int argc, char** argv)
               fout << tmp  << " \n "; 
             }
             //fout << "\n";
-        }
+        }*/
         std::cout << std::endl;
         std::cout<<"---- END EVENT "<<i+1<<" ----"<<std::endl;
     }
