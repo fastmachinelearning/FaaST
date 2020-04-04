@@ -145,26 +145,11 @@ int main(int argc, char** argv)
         OCL_CHECK(err, err = krnls[i].setArg(narg++, buffer_out[i]));
     }
 
-    //load input data from text file
-    std::ifstream fin(datadir+"/tb_input_features.dat");
-    //load predictions from text file
-    std::ifstream fpr(datadir+"/tb_output_predictions.dat");
-  
-    std::string iline;
-    std::string pline;
-    int e = 0;
-    bool hit_end = false;
-    bool valid_data = true;
-    if (!(fin.is_open()) || !(fpr.is_open())) {
-        std::cout << "Unable to open input/predictions file, using random input" << std::endl;
-        valid_data = false;
-        //flag for success/failure of finding data files
-    }
-    std::ofstream fout;
-    fout.open("tb_output_data.dat");
 
     auto t0 = Clock::now();
     auto t1 = Clock::now();
+    auto t1a = Clock::now();
+    auto t1b = Clock::now();
     auto t2 = Clock::now();
     auto t3 = Clock::now();
 
@@ -174,57 +159,25 @@ int main(int argc, char** argv)
     std::vector<std::vector<cl::Event>> waitList(4);
     std::vector<std::vector<cl::Event>> eventList(4);
 
+    for (int i = 0 ; i < 4 ; i++){
+        for (int istream = 0; istream < STREAMSIZE; istream++) {
+        // Create the test data if no data files found or if end of files has been reached
+  	    source_in[(i)*STREAMSIZE+istream] = (bigdata_t)(12354.37674*(istream+STREAMSIZE*(i+1)));
+        }
+    }
     for (int i = 0 ; i < nevents ; i++){
         t0 = Clock::now();
         std::vector<float> pr;
         int ikern = i%4;
-        for (int istream = 0; istream < STREAMSIZE; istream++) {
-  	    if (valid_data && !hit_end){
-            // If files are valid and their end has not been reached yet, get inputs/predictions from files
-                if(std::getline(fin,iline) && std::getline(fpr,pline)) {
-      	            if (e%1000==0) std::cout << "Processing event " << e << std::endl;
-      	            e++;
-                    char* cstr=const_cast<char*>(iline.c_str());
-                    char* current;
-                    std::vector<float> in;
-                    current=strtok(cstr," ");
-                    while(current!=NULL){
-                        in.push_back(atof(current));
-                        current=strtok(NULL," ");
-                    }
-                    cstr=const_cast<char*>(pline.c_str());
-                    current=strtok(cstr," ");
-                    while(current!=NULL){
-                        pr.push_back(atof(current));
-                        current=strtok(NULL," ");
-                    }
-                    for (int j = 0; j < DATA_SIZE_IN; j++) {
-		      source_in[(ikern)*STREAMSIZE+istream].range(16*(j+1)-1,16*j) =  ((data_t)in[j]).range(15,0);
-                    }
-		    //data_t test;
-		    //test.range(15,0) = source_in[(kerni)*STREAMSIZE+istream].range(16*18-1,16*17);
-		    //std::cout << "input check ===> " << source_in[(ikern)*STREAMSIZE+istream] << " -- " <<  source_in[(ikern)*STREAMSIZE+istream].range(15,0) << " -- " << test << " -- " << ((data_t)in[10]) << std::endl;
-		    if(istream % COMPRESSION == 0) source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
-                    
-                } else {
-                    hit_end = true;
-                }
-            }
-            else {
-            // Create the test data if no data files found or if end of files has been reached
-                for(int j = 0 ; j < DATA_SIZE_IN; j++){
-  		  source_in[(ikern)*STREAMSIZE+istream].range(16*(j+1)-1,16*j) = (data_t)(12.34*(j+DATA_SIZE_IN*STREAMSIZE*(i+1)));
-                  //this is just a random number to produce dummy input data
-                }
-		if(istream % COMPRESSION == 0) source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
-            }
-        }
+        //for (int istream = 0; istream < COMPSTREAMSIZE; istream++) {
+        //    source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
+        //}
 
+        t1 = Clock::now();
         if (i >= 4) {
             OCL_CHECK(err, err = read_event[ikern].wait());
         }
     
-        t1 = Clock::now();
         //Copy input data to device global memory
         OCL_CHECK(err,
                   err =
@@ -233,12 +186,14 @@ int main(int argc, char** argv)
                                                  NULL,
                                                  &write_event[ikern]));
 
+        t1a = Clock::now();
         waitList[ikern].clear();
         waitList[ikern].push_back(write_event[ikern]);
         //Launch the kernel
         OCL_CHECK(err,
                   err = q.enqueueNDRangeKernel(
                       krnls[ikern], 0, 1, 1, &waitList[ikern], &kern_event[ikern]));
+        t1b = Clock::now();
         eventList[ikern].clear();
         eventList[ikern].push_back(kern_event[ikern]);
         OCL_CHECK(err,
@@ -258,31 +213,23 @@ int main(int argc, char** argv)
             }
             std::cout << std::endl;
         }*/
-        std::cout<<"Quantized predictions: \n";
-        for (int j = 0 ; j < COMPSTREAMSIZE ; j++){
-            std::cout << source_hw_results[(ikern)*COMPSTREAMSIZE+j] << " ";
-            for (int k = 0 ; k < COMPRESSION ; k++){
-	      data_t tmp;
-	      tmp.range(15,0) = source_hw_results[(ikern)*COMPSTREAMSIZE+j].range((k+1)*16-1,k*16);
-              fout << tmp  << " \n "; 
-            }
-            //fout << "\n";
-        }
+        //std::cout<<"Quantized predictions: \n";
+        //for (int j = 0 ; j < COMPSTREAMSIZE ; j++){
+        //    std::cout << source_hw_results[(ikern)*COMPSTREAMSIZE+j] << " ";
+        //}
         std::cout << std::endl;
         t3 = Clock::now();
         std::cout << " Prep time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
         std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+        std::cout << "    inputs: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1a - t1).count() << " ns" << std::endl;
+        std::cout << "    kernel: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1b - t1a).count() << " ns" << std::endl;
+        std::cout << "   outputs: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1b).count() << " ns" << std::endl;
         std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
         std::cout<<"---- END EVENT "<<i+1<<" ----"<<std::endl;
     }
     OCL_CHECK(err, err = q.flush());
     OCL_CHECK(err, err = q.finish());
 // OPENCL HOST CODE AREA END
-    if (valid_data) {
-        fin.close();
-        fpr.close();
-        fout.close();
-    }
 
     return EXIT_SUCCESS;
 }
