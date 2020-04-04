@@ -79,7 +79,6 @@ ifneq ($(TARGET), hw)
 endif
 
 
-
 EXECUTABLE = host
 CMD_ARGS = $(BUILD_DIR)/alveo_hls4ml.xclbin
 EMCONFIG_DIR = $(TEMP_DIR)
@@ -105,7 +104,7 @@ $(TEMP_DIR)/alveo_hls4ml.xo: src/alveo_hls4ml.cpp
 	$(VPP) $(CLFLAGS) --temp_dir $(TEMP_DIR) -c -k alveo_hls4ml -I'$(<D)' -o'$@' '$<' src/ereg_v1.cpp -DMYPROJ=ereg_v1 -DIS_$(HLS4ML_PROJ_TYPE) -I./src/ -I./src/weights -I./src/nnet_utils/ --config config.ini
 $(BUILD_DIR)/alveo_hls4ml.xclbin: $(BINARY_CONTAINER_alveo_hls4ml_OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR) -l $(LDCLFLAGS) -o'$@' $(+)
+	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR) -l $(LDCLFLAGS) -o'$@' $(+) --config config.ini
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)

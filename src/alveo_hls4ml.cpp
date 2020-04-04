@@ -59,8 +59,8 @@ void alveo_hls4ml(
 // accessing global memory through this interface.
 // Multiple interfaces can also be created based on the requirements. For example when multiple memory accessing arguments need access to
 // global memory simultaneously, user can create multiple master interfaces and can connect to different arguments.
-#pragma HLS INTERFACE m_axi port=in  offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem1
+#pragma HLS INTERFACE m_axi port=in  offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
 #pragma HLS INTERFACE s_axilite port=in   bundle=control
 #pragma HLS INTERFACE s_axilite port=out  bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control

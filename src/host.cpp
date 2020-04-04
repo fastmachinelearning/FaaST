@@ -44,7 +44,7 @@ typedef std::chrono::high_resolution_clock Clock;
 int main(int argc, char** argv)
 {
 
-    int nevents = 1;
+    int nevents = 5;
     std::string datadir = STRINGIFY(HLS4ML_DATA_DIR);
     std::string xclbinFilename = "";
     if (argc > 1) xclbinFilename = argv[1];
@@ -60,14 +60,14 @@ int main(int argc, char** argv)
     // its own host side buffer. So it is recommended to use this allocator if user wish to
     // create buffer using CL_MEM_USE_HOST_PTR to align user buffer to page boundary. It will 
     // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
-    std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in(STREAMSIZE);
-    std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_hw_results(COMPSTREAMSIZE);
+    std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in(STREAMSIZE*4);
+    std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_hw_results(COMPSTREAMSIZE*4);
 
     //initialize
-    for(int j = 0 ; j < STREAMSIZE ; j++){
+    for(int j = 0 ; j < STREAMSIZE*4 ; j++){
         source_in[j] = 0;
     }
-    for(int j = 0 ; j < COMPSTREAMSIZE ; j++){
+    for(int j = 0 ; j < COMPSTREAMSIZE*4 ; j++){
         source_hw_results[j] = 0;
     }
 
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     cl::Device device = devices[0];
 
     cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
@@ -98,23 +98,52 @@ int main(int argc, char** argv)
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
+    cl_int err;
+
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
     // Device-to-host communication
-    cl::Buffer buffer_in   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_in_bytes, source_in.data());
-    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            vector_size_out_bytes, source_hw_results.data());
+    std::vector<cl::Buffer> buffer_in(4);
+    std::vector<cl::Buffer> buffer_out(4);
+    for (int i = 0; i < 4; i++) {
+        OCL_CHECK(err,
+                  buffer_in[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                 vector_size_in_bytes,
+                                 source_in.data() + (i * STREAMSIZE),
+                                 &err));
+        OCL_CHECK(err,
+                  buffer_out[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                 vector_size_out_bytes,
+                                 source_hw_results.data() + (i * COMPSTREAMSIZE),
+                                 &err));
+    }
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_in);
-    outBufVec.push_back(buffer_output);
+    std::vector<cl::Kernel> krnls(4);
+    for (int i = 0; i < 4; i++) {
+        std::string cu_id = std::to_string(i);
+        std::string krnl_name_full =
+            "alveo_hls4ml:{alveo_hls4ml_" + cu_id + "}";
+        printf("Creating a kernel [%s] for CU(%d)\n",
+               krnl_name_full.c_str(),
+               i);
+        //Here Kernel object is created by specifying kernel name along with compute unit.
+        //For such case, this kernel object can only access the specific Compute unit
+        OCL_CHECK(err,
+                  krnls[i] = cl::Kernel(
+                      program, krnl_name_full.c_str(), &err));
+    }
 
-    cl::Kernel krnl_alveo_hls4ml(program,"alveo_hls4ml");
+    for (int i = 0; i < 4; i++) {
+        int narg = 0;
 
-    int narg = 0;
-    krnl_alveo_hls4ml.setArg(narg++, buffer_in);
-    krnl_alveo_hls4ml.setArg(narg++, buffer_output);
+        //Setting kernel arguments
+        OCL_CHECK(err, err = krnls[i].setArg(narg++, buffer_in[i]));
+        OCL_CHECK(err, err = krnls[i].setArg(narg++, buffer_out[i]));
+    }
 
     //load input data from text file
     std::ifstream fin(datadir+"/tb_input_features.dat");
@@ -134,11 +163,21 @@ int main(int argc, char** argv)
     std::ofstream fout;
     fout.open("tb_output_data.dat");
 
+    auto t0 = Clock::now();
     auto t1 = Clock::now();
     auto t2 = Clock::now();
+    auto t3 = Clock::now();
+
+    std::vector<cl::Event> write_event(4);
+    std::vector<cl::Event> kern_event(4);
+    std::vector<cl::Event> read_event(4);
+    std::vector<std::vector<cl::Event>> waitList(4);
+    std::vector<std::vector<cl::Event>> eventList(4);
 
     for (int i = 0 ; i < nevents ; i++){
+        t0 = Clock::now();
         std::vector<float> pr;
+        int ikern = i%4;
         for (int istream = 0; istream < STREAMSIZE; istream++) {
   	    if (valid_data && !hit_end){
             // If files are valid and their end has not been reached yet, get inputs/predictions from files
@@ -160,12 +199,12 @@ int main(int argc, char** argv)
                         current=strtok(NULL," ");
                     }
                     for (int j = 0; j < DATA_SIZE_IN; j++) {
-		      source_in[istream].range(16*(j+1)-1,16*j) =  ((data_t)in[j]).range(15,0);
+		      source_in[(ikern)*STREAMSIZE+istream].range(16*(j+1)-1,16*j) =  ((data_t)in[j]).range(15,0);
                     }
 		    //data_t test;
-		    //test.range(15,0) = source_in[istream].range(16*18-1,16*17);
-		    //std::cout << "input check ===> " << source_in[istream] << " -- " <<  source_in[istream].range(15,0) << " -- " << test << " -- " << ((data_t)in[10]) << std::endl;
-		    if(istream % COMPRESSION == 0) source_hw_results[istream/COMPRESSION] = 0;
+		    //test.range(15,0) = source_in[(kerni)*STREAMSIZE+istream].range(16*18-1,16*17);
+		    //std::cout << "input check ===> " << source_in[(ikern)*STREAMSIZE+istream] << " -- " <<  source_in[(ikern)*STREAMSIZE+istream].range(15,0) << " -- " << test << " -- " << ((data_t)in[10]) << std::endl;
+		    if(istream % COMPRESSION == 0) source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
                     
                 } else {
                     hit_end = true;
@@ -174,28 +213,43 @@ int main(int argc, char** argv)
             else {
             // Create the test data if no data files found or if end of files has been reached
                 for(int j = 0 ; j < DATA_SIZE_IN; j++){
-  		  source_in[istream].range(16*(j+1)-1,16*j) = (data_t)(12.34*(j+DATA_SIZE_IN*STREAMSIZE*(i+1)));
+  		  source_in[(ikern)*STREAMSIZE+istream].range(16*(j+1)-1,16*j) = (data_t)(12.34*(j+DATA_SIZE_IN*STREAMSIZE*(i+1)));
                   //this is just a random number to produce dummy input data
                 }
-		if(istream % COMPRESSION == 0) source_hw_results[istream/COMPRESSION] = 0;
+		if(istream % COMPRESSION == 0) source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
             }
+        }
+
+        if (i >= 4) {
+            OCL_CHECK(err, err = read_event[ikern].wait());
         }
     
         t1 = Clock::now();
-        // Copy input data to device global memory
-        q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
-        // Launch the Kernel
-        // For HLS kernels global and local size is always (1,1,1). So, it is recommended
-        // to always use enqueueTask() for invoking HLS kernel
-        q.enqueueTask(krnl_alveo_hls4ml);
-        // Copy Result from Device Global Memory to Host Local Memory
-        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-        // Check for any errors from the command queue
-        q.finish();
-        t2 = Clock::now();
-        std::cout << "FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+        //Copy input data to device global memory
+        OCL_CHECK(err,
+                  err =
+                      q.enqueueMigrateMemObjects({buffer_in[ikern]},
+                                                 0 /* 0 means from host*/,
+                                                 NULL,
+                                                 &write_event[ikern]));
 
-        if (valid_data && !hit_end) {
+        waitList[ikern].clear();
+        waitList[ikern].push_back(write_event[ikern]);
+        //Launch the kernel
+        OCL_CHECK(err,
+                  err = q.enqueueNDRangeKernel(
+                      krnls[ikern], 0, 1, 1, &waitList[ikern], &kern_event[ikern]));
+        eventList[ikern].clear();
+        eventList[ikern].push_back(kern_event[ikern]);
+        OCL_CHECK(err,
+                  err = q.enqueueMigrateMemObjects({buffer_out[ikern]},
+                                                   CL_MIGRATE_MEM_OBJECT_HOST,
+                                                   &eventList[ikern],
+                                                   &read_event[ikern]));
+    
+        t2 = Clock::now();
+
+        /*if (valid_data && !hit_end) {
             std::cout<<"Predictions: \n";
             for (int j = 0 ; j < STREAMSIZE ; j++){
                 for (int k = 0 ; k < DATA_SIZE_OUT ; k++){
@@ -203,20 +257,26 @@ int main(int argc, char** argv)
                 }
             }
             std::cout << std::endl;
-        }
-        /*std::cout<<"Quantized predictions: \n";
+        }*/
+        std::cout<<"Quantized predictions: \n";
         for (int j = 0 ; j < COMPSTREAMSIZE ; j++){
+            std::cout << source_hw_results[(ikern)*COMPSTREAMSIZE+j] << " ";
             for (int k = 0 ; k < COMPRESSION ; k++){
 	      data_t tmp;
-	      tmp.range(15,0) = source_hw_results[j].range((k+1)*16-1,k*16);
-	      std::cout << tmp  << " \n";
+	      tmp.range(15,0) = source_hw_results[(ikern)*COMPSTREAMSIZE+j].range((k+1)*16-1,k*16);
               fout << tmp  << " \n "; 
             }
             //fout << "\n";
-        }*/
+        }
         std::cout << std::endl;
+        t3 = Clock::now();
+        std::cout << " Prep time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
+        std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+        std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
         std::cout<<"---- END EVENT "<<i+1<<" ----"<<std::endl;
     }
+    OCL_CHECK(err, err = q.flush());
+    OCL_CHECK(err, err = q.finish());
 // OPENCL HOST CODE AREA END
     if (valid_data) {
         fin.close();
