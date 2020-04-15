@@ -6,7 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <chrono>
+#include <ctime>
+#include <iomanip>
 typedef std::chrono::high_resolution_clock Clock;
+typedef std::chrono::system_clock SClock;
 
 #include "xcl2.hpp"
 #include <vector>
@@ -36,14 +39,71 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
  public:
   std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in;
   std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_hw_results;
-  std::vector<cl::Memory> inBufVec, outBufVec;
   cl::Program program;
-  cl::CommandQueue q;
-  cl::Kernel krnl_xil;
+  std::vector<cl::CommandQueue> q;
+  std::vector<cl::Kernel> krnl_xil;
+  int ikern;
+  std::vector<bool> isFirstRun;
+  std::vector<std::vector<cl::Event>>   writeList;
+  std::vector<std::vector<cl::Event>>   kernList;
+  std::vector<std::vector<cl::Event>>   readList;
+  std::vector<cl::Buffer> buffer_in;
+  std::vector<cl::Buffer> buffer_out;
+  std::vector<cl::Event>   write_event;
+  std::vector<cl::Event>   kern_event;
+  //std::vector<cl::Event>   read_event;
+  std::mutex mtx;
+  std::mutex mtxi_write[4*NBUFFER];
+
+  std::pair<int,bool> get_info_lock() {
+    int i;
+    bool first;
+    mtx.lock();
+    i = ikern++;
+    first = isFirstRun[i];
+    if (first) isFirstRun[i]=false;
+    if (ikern==4*NBUFFER) ikern=0;
+    mtx.unlock();
+    return std::make_pair(i,first);
+  }
+  void get_ilock_write(int ik) {
+    mtxi_write[ik].lock();
+  }
+  void release_ilock_write(int ik) {
+    mtxi_write[ik].unlock();
+  }
 
  private:
-  std::vector<cl::Event>   waitInput_;//m_Mem2FpgaEvents;
-  std::vector<cl::Event>   waitOutput_;//m_ExeKernelEvents;
+
+  cl_int err;
+
+  void print_nanoseconds(std::string prefix, std::chrono::time_point<std::chrono::system_clock> now, int ik) {
+    auto duration = now.time_since_epoch();
+    
+    typedef std::chrono::duration<int, std::ratio_multiply<std::chrono::hours::period, std::ratio<8>
+    >::type> Days; /* UTC: +8:00 */
+    
+    Days days = std::chrono::duration_cast<Days>(duration);
+        duration -= days;
+    auto hours = std::chrono::duration_cast<std::chrono::hours>(duration);
+        duration -= hours;
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
+        duration -= minutes;
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+        duration -= seconds;
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+        duration -= milliseconds;
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+        duration -= microseconds;
+    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
+
+    std::cout << "KERN" << ik << ", " << prefix << hours.count() << ":"
+          << minutes.count() << ":"
+          << seconds.count() << ":"
+          << milliseconds.count() << ":"
+          << microseconds.count() << ":"
+          << nanoseconds.count() << std::endl;
+  }
 
   grpc::Status Status(
 		     ServerContext* context, 
@@ -51,7 +111,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     StatusResponse* reply
 		     ) override {
 
-    std::cout << "In Status" << std::endl;
+    //std::cout << "In Status" << std::endl;
     auto server_status = reply->mutable_server_status();
     server_status->set_id("inference:0");
     auto& model_status  = *server_status->mutable_model_status();
@@ -79,11 +139,20 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     InferResponse* reply
 		     ) override {
     auto t0 = Clock::now();
+    auto ikf = get_info_lock();
+    int ikb = ikf.first;
+    int ik = ikb%4;
+    bool firstRun = ikf.second;
+    //std::cout<<"Running kernel "<<ik<<"... first run? ("<<firstRun<<")"<<std::endl;
+    auto ts1_ = SClock::now();
+    //print_nanoseconds("   in Infer  ",ts1_, ikb);
+    //std::cout<<request->meta_data().batch_size()<<std::endl;
     const std::string& raw = request->raw_input(0);
     const void* lVals = raw.c_str();
     data_t* lFVals = (data_t*) lVals;
     //output array that is equal to ninputs(15)*batch flot is 4 bytes
     unsigned batch_size = raw.size()/32/sizeof(data_t);
+    //std::cout<<raw.size()<<std::endl;
     reply->mutable_request_status()->set_code(RequestStatusCode::SUCCESS);
     reply->mutable_request_status()->set_server_id("inference:0");
     reply->mutable_meta_data()->set_id(request->meta_data().id());
@@ -94,44 +163,74 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     auto output1 = reply->mutable_meta_data()->add_output();
     output1->set_name("output/BiasAdd");
     output1->mutable_raw()->mutable_dims()->Add(1);
-    output1->mutable_raw()->set_batch_byte_size(8*batch_size);
-    memcpy(source_in.data(), &lFVals[0], batch_size*32*sizeof(data_t));
-    auto t1 = Clock::now();
+    output1->mutable_raw()->set_batch_byte_size(sizeof(data_t)*batch_size);
 
-    // Copy input data to device global memory
-    //cl::Event l_event_in;
-    //q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/,NULL,&l_event_in);
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
-    // waitInput_.emplace_back(l_event_in);
-    //l_event_in.wait();
-    //cl::Event l_event;
-    //q.enqueueTask(krnl_xil,&(waitInput_),&l_event);
-    q.enqueueTask(krnl_xil);
-    //waitOutput_.push_back(l_event);
-    //l_event.wait();
-    //waitInput_.clear();
-    //cl::Event l_event_out;
-    //q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST,&waitOutput_,&l_event_out);
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    //l_event_out.wait();
-    // Check for any errors from the command queue
-    q.finish();
-    //waitInput_.clear();
-    //waitOutput_.clear();
+    auto ts1p = SClock::now();
+    //print_nanoseconds("   pre-lock  ",ts1p, ikb);
+    get_ilock_write(ikb);
+    auto ts1 = SClock::now();
+    //print_nanoseconds("       start:   ",ts1, ik);
+    memcpy(source_in.data()+ikb*STREAMSIZE, &lFVals[0], batch_size*sizeof(bigdata_t));
+    auto t1 = Clock::now();
+    auto ts1a = SClock::now();
+    //print_nanoseconds("   memcpy  ",ts1a, ikb);
+    if (!firstRun) {
+        OCL_CHECK(err, err = kern_event[ikb].wait());
+    }
+    auto ts1b = SClock::now();
+    //print_nanoseconds("   kernwait  ",ts1b, ikb);
+    OCL_CHECK(err,
+              err =
+                  q[ik].enqueueMigrateMemObjects({buffer_in[ikb]},
+                                             0 /* 0 means from host*/,
+                                             NULL,
+                                             &(write_event[ikb])));
+    auto ts1c = SClock::now();
+   // print_nanoseconds("       write:   ",ts1c, ik);
+    
+    writeList[ikb].clear();
+    writeList[ikb].push_back(write_event[ikb]);
+    //Launch the kernel
+    OCL_CHECK(err,
+              err = q[ik].enqueueNDRangeKernel(
+                  krnl_xil[ikb], 0, 1, 1, &(writeList[ikb]), &(kern_event[ikb])));
+    auto ts1d = SClock::now();
+    //print_nanoseconds("      kernel:   ",ts1d, ik);
+    kernList[ikb].clear();
+    kernList[ikb].push_back(kern_event[ikb]);
+    cl::Event read_event;
+    OCL_CHECK(err,
+              err = q[ik].enqueueMigrateMemObjects({buffer_out[ikb]},
+                                               CL_MIGRATE_MEM_OBJECT_HOST,
+                                               &(kernList[ikb]),
+                                               &(read_event)));
+    auto ts1e = SClock::now();
+    //print_nanoseconds("        read:   ",ts1e, ik);
+
+    release_ilock_write(ikb);
+    OCL_CHECK(err, err = kern_event[ikb].wait());
+    OCL_CHECK(err, err = read_event.wait());
+    auto ts1f = SClock::now();
+    //print_nanoseconds("   readwait  ",ts1f, ikb);
     auto t2 = Clock::now();
+    auto ts2 = SClock::now();
+    //print_nanoseconds("       finish:  ",ts2, ik);
     //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
 
     //Finally deal with the ouputs
     std::string *outputs1 = reply->add_raw_output();
     char* lTVals = new char[batch_size*sizeof(data_t)];
-    memcpy(&lTVals[0], source_hw_results.data(), (batch_size)*sizeof(data_t));
+    memcpy(&lTVals[0], source_hw_results.data()+(ikb*COMPSTREAMSIZE), (batch_size)*sizeof(data_t));
     outputs1->append(lTVals,(batch_size)*sizeof(data_t));
+    auto ts1g = SClock::now();
+    //print_nanoseconds("   finish  ",ts1g, ikb);
 
     auto t3 = Clock::now();
-    std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
-    std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
-    std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " ns" << std::endl;
-    std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+    //std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
+    //std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
+    //std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " ns" << std::endl;
+    //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+
     return grpc::Status::OK;
   } 
 };
@@ -162,24 +261,19 @@ void Run(std::string xclbinFilename) {
   // create buffer using CL_MEM_USE_HOST_PTR to align user buffer to page boundary. It will 
   // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
 
-  service.source_in.reserve(STREAMSIZE);
-  service.source_hw_results.reserve(COMPSTREAMSIZE);
-
   //initialize
-  //for(int j = 0 ; j < STREAMSIZE ; j++){
-  //  service.source_in[j] = 0;
-  // }
-  //for(int j = 0 ; j < COMPSTREAMSIZE ; j++){
-  //  service.source_hw_results[j] = 0;
-  // }
+  service.source_in.reserve(STREAMSIZE*4*NBUFFER);
+  service.source_hw_results.reserve(COMPSTREAMSIZE*4*NBUFFER);
 
   std::vector<cl::Device> devices = xcl::get_xil_devices();
   cl::Device device = devices[0];
   devices.resize(1);
 
   cl::Context context(device);
-  cl::CommandQueue q_tmp(context, device,  CL_QUEUE_PROFILING_ENABLE);//CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE  );//| CL_QUEUE_PROFILING_ENABLE);
-  service.q = q_tmp;
+  for (int ik = 0; ik < 4; ik++) {
+    cl::CommandQueue q_tmp(context, device,  CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    service.q.push_back(q_tmp);
+  }
   std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
@@ -207,24 +301,48 @@ void Run(std::string xclbinFilename) {
   }
   cl::Program tmp_program(context, devices, bins);
   service.program = tmp_program;
-  cl::Kernel krnl_alveo_hls4ml(service.program,"alveo_hls4ml");
-  service.krnl_xil = krnl_alveo_hls4ml;
+  for (int ib = 0; ib < NBUFFER; ib++) {
+    for (int ik = 0; ik < 4; ik++) {
+      std::string kernel_name = "alveo_hls4ml:{alveo_hls4ml_" + std::to_string(ik) + "}";
+      cl::Kernel krnl_alveo_hls4ml(service.program,kernel_name.c_str());
+      service.krnl_xil.push_back(krnl_alveo_hls4ml);
+    }
+  }
 
-  // Allocate Buffer in Global Memory
-  // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
-  // Device-to-host communication
-  cl::Buffer buffer_in    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, service.source_in.data());
-  cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, service.source_hw_results.data());
+  service.writeList.reserve(4*NBUFFER);
+  service.kernList.reserve(4*NBUFFER);
+  service.readList.reserve(4*NBUFFER);
+  for (int ib = 0; ib < NBUFFER; ib++) {
+    for (int ik = 0; ik < 4; ik++) {
+      // Allocate Buffer in Global Memory
+      // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
+      // Device-to-host communication
+      cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, service.source_in.data()+((ib*4+ik) * STREAMSIZE));
+      cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, service.source_hw_results.data()+((ib*4+ik) * COMPSTREAMSIZE));
+      service.buffer_in.push_back(buffer_in_tmp);
+      service.buffer_out.push_back(buffer_out_tmp);
+  
+      cl::Event tmp_write = cl::Event();
+      cl::Event tmp_kern = cl::Event();
+      cl::Event tmp_read = cl::Event();
+      service.write_event.push_back(tmp_write);
+      service.kern_event.push_back(tmp_kern);
+      //service.read_event.push_back(tmp_read);
+  
+      int narg = 0;
+      service.krnl_xil[ib*4+ik].setArg(narg++, service.buffer_in[ib*4+ik]);
+      service.krnl_xil[ib*4+ik].setArg(narg++, service.buffer_out[ib*4+ik]);
+      service.isFirstRun.push_back(true);
+      std::vector<cl::Event> tmp_write_vec(1);
+      std::vector<cl::Event> tmp_kern_vec(1);
+      std::vector<cl::Event> tmp_read_vec(1);
+      service.writeList.push_back(tmp_write_vec);
+      service.kernList.push_back(tmp_kern_vec);
+      service.readList.push_back(tmp_read_vec);
+    }
+  }
 
-  //service.inBufVec.clear();
-  //service.outBufVec.clear();
-  service.inBufVec.push_back(buffer_in);
-  service.outBufVec.push_back(buffer_output);
-
-  int narg = 0;
-  service.krnl_xil.setArg(narg++, buffer_in);
-  service.krnl_xil.setArg(narg++, buffer_output);
-
+  service.ikern = 0;
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on port: " << address << std::endl;
   int server_id=1;
