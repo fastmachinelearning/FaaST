@@ -1,10 +1,12 @@
 #include "ap_fixed.h"
 #include <parameters.h>
 
-#define STREAMSIZE 16384
 //how many consecutive sets of inputs to run over per kernel execution
 #define COMPRESSION 32
 #define COMPSTREAMSIZE 512
+#define STREAMSIZE 16384
+
+#define NBUFFER 128
 
 #define DATA_SIZE_IN N_INPUT_1_1
 #define DATA_SIZE_OUT N_LAYER_11

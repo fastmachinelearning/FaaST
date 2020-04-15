@@ -173,7 +173,7 @@ class fpgaObj {
     std::stringstream ss;
     int ithr;
     int nevents;
-    ap_uint<2> ikern;
+    int ikern;
     std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in;
     std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_hw_results;
     cl::Program program;
@@ -186,7 +186,7 @@ class fpgaObj {
     std::vector<cl::Buffer> buffer_out;
     std::vector<cl::Event>   write_event;
     std::vector<cl::Event>   kern_event;
-    std::vector<cl::Event>   read_event;
+    //std::vector<cl::Event>   read_event;
     std::vector<bool> isFirstRun;
     cl_int err;
 
@@ -196,22 +196,17 @@ class fpgaObj {
       mtx.lock();
       //i = rand() % 1;
       i = ikern++;
+      if (ikern==4*NBUFFER) ikern = 0;
       first = isFirstRun[i];
       if (first) isFirstRun[i]=false;
       mtx.unlock();
       return std::make_pair(i,first);
     }
     void get_ilock(int ik) {
-      if (ik==0) {mtx0.lock();}
-      else if (ik==1) {mtx1.lock();}
-      else if (ik==2) {mtx2.lock();}
-      else {mtx3.lock();}
+      mtxi[ik].lock();
     }
     void release_ilock(int ik) {
-      if (ik==0) {mtx0.unlock();}
-      else if (ik==1) {mtx1.unlock();}
-      else if (ik==2) {mtx2.unlock();}
-      else {mtx3.unlock();}
+      mtxi[ik].unlock();
     }
     void write_ss_safe(std::string newss) {
       smtx.lock();
@@ -228,57 +223,65 @@ class fpgaObj {
         auto t2 = Clock::now();
         auto t3 = Clock::now();
         std::stringstream ss;
+        unsigned int lFVals[16*STREAMSIZE];
+        for (unsigned int j = 0; j < 16*STREAMSIZE; j++) {
+            lFVals[j] = rand();
+        }
     
         for (int i = 0 ; i < nevents ; i++){
             t0 = Clock::now();
             //int ikern = i%4;
-            auto ikb = get_info_lock();
-            int ik = ikb.first;
-            bool firstRun = ikb.second;
+            auto ikf = get_info_lock();
+            int ikb = ikf.first;
+            int ik = ikb%4;
+            bool firstRun = ikf.second;
             //for (int istream = 0; istream < COMPSTREAMSIZE; istream++) {
             //    source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
             //}
+
+            memcpy(source_in.data()+ikb*STREAMSIZE, &lFVals[0], STREAMSIZE*sizeof(bigdata_t));
     
             t1 = Clock::now();
             auto ts1 = SClock::now();
             print_nanoseconds("        start:  ",ts1, ik, ss);
-            std::string queuename = "ooo_queue "+std::to_string(ik);
+            std::string queuename = "ooo_queue "+std::to_string(ikb);
         
-            get_ilock(ik);
+            get_ilock(ikb);
             //Copy input data to device global memory
-            //if (!firstRun) {
-            //    OCL_CHECK(err, err = kern_event[ik].wait());
-            //}
+            if (!firstRun) {
+                OCL_CHECK(err, err = kern_event[ikb].wait());
+            }
             OCL_CHECK(err,
                       err =
-                          q[ik].enqueueMigrateMemObjects({buffer_in[ik]},
+                          q[ik].enqueueMigrateMemObjects({buffer_in[ikb]},
                                                      0 /* 0 means from host*/,
                                                      NULL,
-                                                     &(write_event[ik])));
-            //set_callback(write_event[ik], queuename.c_str());
+                                                     &(write_event[ikb])));
+            //set_callback(write_event[ikb], queuename.c_str());
     
             t1a = Clock::now();
-            writeList[ik].clear();
-            writeList[ik].push_back(write_event[ik]);
+            writeList[ikb].clear();
+            writeList[ikb].push_back(write_event[ikb]);
             //Launch the kernel
             OCL_CHECK(err,
                       err = q[ik].enqueueNDRangeKernel(
-                          krnl_xil[ik], 0, 1, 1, &(writeList[ik]), &(kern_event[ik])));
-            //set_callback(kern_event[ik], queuename.c_str());
+                          krnl_xil[ikb], 0, 1, 1, &(writeList[ikb]), &(kern_event[ikb])));
+            //set_callback(kern_event[ikb], queuename.c_str());
             t1b = Clock::now();
-            kernList[ik].clear();
-            kernList[ik].push_back(kern_event[ik]);
+            kernList[ikb].clear();
+            kernList[ikb].push_back(kern_event[ikb]);
+            cl::Event read_event;
             OCL_CHECK(err,
-                      err = q[ik].enqueueMigrateMemObjects({buffer_out[ik]},
+                      err = q[ik].enqueueMigrateMemObjects({buffer_out[ikb]},
                                                        CL_MIGRATE_MEM_OBJECT_HOST,
-                                                       &(kernList[ik]),
-                                                       &(read_event[ik])));
+                                                       &(kernList[ikb]),
+                                                       &(read_event)));
 
-            //set_callback(read_event[ik], queuename.c_str());
-            OCL_CHECK(err, err = kern_event[ik].wait());
-            release_ilock(ik);
+            //set_callback(read_event, queuename.c_str());
+            release_ilock(ikb);
         
-            OCL_CHECK(err, err = read_event[ik].wait());
+            OCL_CHECK(err, err = kern_event[ikb].wait());
+            OCL_CHECK(err, err = read_event.wait());
             auto ts2 = SClock::now();
             print_nanoseconds("       finish:  ",ts2, ik, ss);
             t2 = Clock::now();
@@ -311,10 +314,11 @@ class fpgaObj {
 
   private:
     mutable std::mutex mtx;
-    mutable std::mutex mtx0;
-    mutable std::mutex mtx1;
-    mutable std::mutex mtx2;
-    mutable std::mutex mtx3;
+    mutable std::mutex mtxi[4*NBUFFER];
+    //mutable std::mutex mtx0;
+    //mutable std::mutex mtx1;
+    //mutable std::mutex mtx2;
+    //mutable std::mutex mtx3;
     mutable std::mutex smtx;
 };
 
@@ -348,15 +352,15 @@ int main(int argc, char** argv)
     fpgaObj fpga;
     fpga.nevents = nevents;
     fpga.ikern = 0;
-    fpga.source_in.reserve(STREAMSIZE*4);
-    fpga.source_hw_results.reserve(COMPSTREAMSIZE*4);
+    fpga.source_in.reserve(STREAMSIZE*4*NBUFFER);
+    fpga.source_hw_results.reserve(COMPSTREAMSIZE*4*NBUFFER);
     
 
     //initialize
-    for(int j = 0 ; j < STREAMSIZE*4 ; j++){
+    for(int j = 0 ; j < STREAMSIZE*4*NBUFFER ; j++){
         fpga.source_in[j] = 0;
     }
-    for(int j = 0 ; j < COMPSTREAMSIZE*4 ; j++){
+    for(int j = 0 ; j < COMPSTREAMSIZE*4*NBUFFER ; j++){
         fpga.source_hw_results[j] = 0;
     }
 
@@ -391,50 +395,54 @@ int main(int argc, char** argv)
     cl::Program tmp_program(context, devices, bins);
     fpga.program = tmp_program;
 
-    for (int i = 0; i < 4; i++) {
-        std::string cu_id = std::to_string(i);
-        std::string krnl_name_full =
-            "alveo_hls4ml:{alveo_hls4ml_" + cu_id + "}";
-        printf("Creating a kernel [%s] for CU(%d)\n",
-               krnl_name_full.c_str(),
-               i);
-        //Here Kernel object is created by specifying kernel name along with compute unit.
-        //For such case, this kernel object can only access the specific Compute unit
-        cl::Kernel krnl_tmp = cl::Kernel(
-               fpga.program, krnl_name_full.c_str(), &fpga.err);
-        fpga.krnl_xil.push_back(krnl_tmp);
+    for (int ib = 0; ib < NBUFFER; ib++) {
+        for (int i = 0; i < 4; i++) {
+            std::string cu_id = std::to_string(i);
+            std::string krnl_name_full =
+                "alveo_hls4ml:{alveo_hls4ml_" + cu_id + "}";
+            printf("Creating a kernel [%s] for CU(%d)\n",
+                   krnl_name_full.c_str(),
+                   i);
+            //Here Kernel object is created by specifying kernel name along with compute unit.
+            //For such case, this kernel object can only access the specific Compute unit
+            cl::Kernel krnl_tmp = cl::Kernel(
+                   fpga.program, krnl_name_full.c_str(), &fpga.err);
+            fpga.krnl_xil.push_back(krnl_tmp);
+        }
     }
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
     // Device-to-host communication
     
-    fpga.writeList.reserve(4);
-    fpga.kernList.reserve(4);
-    fpga.readList.reserve(4);
-    for (int ik = 0; ik < 4; ik++) {
-        cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, fpga.source_in.data()+(ik * STREAMSIZE));
-        cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, fpga.source_hw_results.data()+(ik * COMPSTREAMSIZE));
-        fpga.buffer_in.push_back(buffer_in_tmp);
-        fpga.buffer_out.push_back(buffer_out_tmp);
-    
-        cl::Event tmp_write = cl::Event();
-        cl::Event tmp_kern = cl::Event();
-        cl::Event tmp_read = cl::Event();
-        fpga.write_event.push_back(tmp_write);
-        fpga.kern_event.push_back(tmp_kern);
-        fpga.read_event.push_back(tmp_read);
-    
-        int narg = 0;
-        fpga.krnl_xil[ik].setArg(narg++, fpga.buffer_in[ik]);
-        fpga.krnl_xil[ik].setArg(narg++, fpga.buffer_out[ik]);
-        fpga.isFirstRun.push_back(true);
-        std::vector<cl::Event> tmp_write_vec(1);
-        std::vector<cl::Event> tmp_kern_vec(1);
-        std::vector<cl::Event> tmp_read_vec(1);
-        fpga.writeList.push_back(tmp_write_vec);
-        fpga.kernList.push_back(tmp_kern_vec);
-        fpga.readList.push_back(tmp_read_vec);
+    fpga.writeList.reserve(4*NBUFFER);
+    fpga.kernList.reserve(4*NBUFFER);
+    fpga.readList.reserve(4*NBUFFER);
+    for (int ib = 0; ib < NBUFFER; ib++) {
+        for (int ik = 0; ik < 4; ik++) {
+            cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, fpga.source_in.data()+((ib*4+ik) * STREAMSIZE));
+            cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, fpga.source_hw_results.data()+((ib*4+ik) * COMPSTREAMSIZE));
+            fpga.buffer_in.push_back(buffer_in_tmp);
+            fpga.buffer_out.push_back(buffer_out_tmp);
+        
+            cl::Event tmp_write = cl::Event();
+            cl::Event tmp_kern = cl::Event();
+            cl::Event tmp_read = cl::Event();
+            fpga.write_event.push_back(tmp_write);
+            fpga.kern_event.push_back(tmp_kern);
+            //fpga.read_event.push_back(tmp_read);
+        
+            int narg = 0;
+            fpga.krnl_xil[ib*4+ik].setArg(narg++, fpga.buffer_in[ib*4+ik]);
+            fpga.krnl_xil[ib*4+ik].setArg(narg++, fpga.buffer_out[ib*4+ik]);
+            fpga.isFirstRun.push_back(true);
+            std::vector<cl::Event> tmp_write_vec(1);
+            std::vector<cl::Event> tmp_kern_vec(1);
+            std::vector<cl::Event> tmp_read_vec(1);
+            fpga.writeList.push_back(tmp_write_vec);
+            fpga.kernList.push_back(tmp_kern_vec);
+            fpga.readList.push_back(tmp_read_vec);
+        }
     }
 
     auto t0 = Clock::now();
@@ -444,22 +452,35 @@ int main(int argc, char** argv)
     auto t2 = Clock::now();
     auto t3 = Clock::now();
 
-    for (int i = 0 ; i < 4 ; i++){
-        for (int istream = 0; istream < STREAMSIZE; istream++) {
-        // Create the test data if no data files found or if end of files has been reached
-  	    fpga.source_in[(i)*STREAMSIZE+istream] = (bigdata_t)(12354.37674*(istream+STREAMSIZE*(i+1)));
+    for (int ib = 0; ib < NBUFFER; ib++) {
+        for (int i = 0 ; i < 4 ; i++){
+            for (int istream = 0; istream < STREAMSIZE; istream++) {
+            // Create the test data if no data files found or if end of files has been reached
+      	        fpga.source_in[ib*4*STREAMSIZE+i*STREAMSIZE+istream] = (bigdata_t)(12354.37674*(istream+STREAMSIZE*(ib+i+1)));
+            }
         }
     }
+
+    auto ts0 = SClock::now();
+    print_nanoseconds("      begin:  ",ts0, 0);
 
     fpga.ithr = 0;
     std::thread th0(FPGA, std::ref(fpga));
     std::thread th1(FPGA, std::ref(fpga));
     std::thread th2(FPGA, std::ref(fpga));
     std::thread th3(FPGA, std::ref(fpga));
+    std::thread th4(FPGA, std::ref(fpga));
+    std::thread th5(FPGA, std::ref(fpga));
+    std::thread th6(FPGA, std::ref(fpga));
+    std::thread th7(FPGA, std::ref(fpga));
     th0.join();
     th1.join();
     th2.join();
     th3.join();
+    th4.join();
+    th5.join();
+    th6.join();
+    th7.join();
     //FPGA(std::ref(fpga));
     auto ts4 = SClock::now();
     print_nanoseconds("       done:  ",ts4, 0);
