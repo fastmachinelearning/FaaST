@@ -21,6 +21,9 @@ typedef std::chrono::system_clock SClock;
 
 #include "kernel_params.h"
 
+#define NUM_CU 4
+#define NBUFFER 8
+
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
@@ -53,7 +56,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
   std::vector<cl::Event>   kern_event;
   //std::vector<cl::Event>   read_event;
   std::mutex mtx;
-  std::mutex mtxi_write[4*NBUFFER];
+  std::mutex mtxi_write[NUM_CU*NBUFFER];
 
   std::pair<int,bool> get_info_lock() {
     int i;
@@ -62,7 +65,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     i = ikern++;
     first = isFirstRun[i];
     if (first) isFirstRun[i]=false;
-    if (ikern==4*NBUFFER) ikern=0;
+    if (ikern==NUM_CU*NBUFFER) ikern=0;
     mtx.unlock();
     return std::make_pair(i,first);
   }
@@ -141,7 +144,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     auto t0 = Clock::now();
     auto ikf = get_info_lock();
     int ikb = ikf.first;
-    int ik = ikb%4;
+    int ik = ikb%NUM_CU;
     bool firstRun = ikf.second;
     //std::cout<<"Running kernel "<<ik<<"... first run? ("<<firstRun<<")"<<std::endl;
     auto ts1_ = SClock::now();
@@ -222,6 +225,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     char* lTVals = new char[batch_size*sizeof(data_t)];
     memcpy(&lTVals[0], source_hw_results.data()+(ikb*COMPSTREAMSIZE), (batch_size)*sizeof(data_t));
     outputs1->append(lTVals,(batch_size)*sizeof(data_t));
+    delete[] lTVals;
     auto ts1g = SClock::now();
     //print_nanoseconds("   finish  ",ts1g, ikb);
 
@@ -262,15 +266,15 @@ void Run(std::string xclbinFilename) {
   // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
 
   //initialize
-  service.source_in.reserve(STREAMSIZE*4*NBUFFER);
-  service.source_hw_results.reserve(COMPSTREAMSIZE*4*NBUFFER);
+  service.source_in.reserve(STREAMSIZE*NUM_CU*NBUFFER);
+  service.source_hw_results.reserve(COMPSTREAMSIZE*NUM_CU*NBUFFER);
 
   std::vector<cl::Device> devices = xcl::get_xil_devices();
   cl::Device device = devices[0];
   devices.resize(1);
 
   cl::Context context(device);
-  for (int ik = 0; ik < 4; ik++) {
+  for (int ik = 0; ik < NUM_CU; ik++) {
     cl::CommandQueue q_tmp(context, device,  CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
     service.q.push_back(q_tmp);
   }
@@ -302,23 +306,23 @@ void Run(std::string xclbinFilename) {
   cl::Program tmp_program(context, devices, bins);
   service.program = tmp_program;
   for (int ib = 0; ib < NBUFFER; ib++) {
-    for (int ik = 0; ik < 4; ik++) {
+    for (int ik = 0; ik < NUM_CU; ik++) {
       std::string kernel_name = "alveo_hls4ml:{alveo_hls4ml_" + std::to_string(ik) + "}";
       cl::Kernel krnl_alveo_hls4ml(service.program,kernel_name.c_str());
       service.krnl_xil.push_back(krnl_alveo_hls4ml);
     }
   }
 
-  service.writeList.reserve(4*NBUFFER);
-  service.kernList.reserve(4*NBUFFER);
-  service.readList.reserve(4*NBUFFER);
+  service.writeList.reserve(NUM_CU*NBUFFER);
+  service.kernList.reserve(NUM_CU*NBUFFER);
+  service.readList.reserve(NUM_CU*NBUFFER);
   for (int ib = 0; ib < NBUFFER; ib++) {
-    for (int ik = 0; ik < 4; ik++) {
+    for (int ik = 0; ik < NUM_CU; ik++) {
       // Allocate Buffer in Global Memory
       // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
       // Device-to-host communication
-      cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, service.source_in.data()+((ib*4+ik) * STREAMSIZE));
-      cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, service.source_hw_results.data()+((ib*4+ik) * COMPSTREAMSIZE));
+      cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, service.source_in.data()+((ib*NUM_CU+ik) * STREAMSIZE));
+      cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, service.source_hw_results.data()+((ib*NUM_CU+ik) * COMPSTREAMSIZE));
       service.buffer_in.push_back(buffer_in_tmp);
       service.buffer_out.push_back(buffer_out_tmp);
   
@@ -330,8 +334,8 @@ void Run(std::string xclbinFilename) {
       //service.read_event.push_back(tmp_read);
   
       int narg = 0;
-      service.krnl_xil[ib*4+ik].setArg(narg++, service.buffer_in[ib*4+ik]);
-      service.krnl_xil[ib*4+ik].setArg(narg++, service.buffer_out[ib*4+ik]);
+      service.krnl_xil[ib*NUM_CU+ik].setArg(narg++, service.buffer_in[ib*NUM_CU+ik]);
+      service.krnl_xil[ib*NUM_CU+ik].setArg(narg++, service.buffer_out[ib*NUM_CU+ik]);
       service.isFirstRun.push_back(true);
       std::vector<cl::Event> tmp_write_vec(1);
       std::vector<cl::Event> tmp_kern_vec(1);
