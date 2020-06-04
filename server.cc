@@ -8,6 +8,7 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <thread>
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::system_clock SClock;
 
@@ -168,6 +169,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     output1->mutable_raw()->mutable_dims()->Add(1);
     output1->mutable_raw()->set_batch_byte_size(sizeof(data_t)*batch_size);
 
+
     auto ts1p = SClock::now();
     //print_nanoseconds("   pre-lock  ",ts1p, ikb);
     get_ilock_write(ikb);
@@ -185,7 +187,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     OCL_CHECK(err,
               err =
                   q[ik].enqueueMigrateMemObjects({buffer_in[ikb]},
-                                             0 /* 0 means from host*/,
+                                             0,
                                              NULL,
                                              &(write_event[ikb])));
     auto ts1c = SClock::now();
@@ -239,14 +241,20 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
   } 
 };
 
-void Run(std::string xclbinFilename) {
-  std::string address("0.0.0.0:5001");
+void runWait(std::unique_ptr<Server> srv) {
+    srv->Wait();
+}
+
+void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
   GRPCServiceImplementation service;
 
-  ServerBuilder builder;
-  builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-  builder.SetMaxMessageSize(10000000);
-  builder.RegisterService(&service);
+  ServerBuilder builders[num_servers];
+  for (unsigned int is = 0; is < num_servers; is++) {
+      std::string srv_address = "0.0.0.0:"+std::to_string(port+is);
+      builders[is].AddListeningPort(srv_address, grpc::InsecureServerCredentials());
+      builders[is].SetMaxMessageSize(10000000);
+      builders[is].RegisterService(&service);
+  }
   //All the crap that trt inference server runs
   //std::unique_ptr<grpc::ServerCompletionQueue> health_cq = builder.AddCompletionQueue();
   //std::unique_ptr<grpc::ServerCompletionQueue> status_cq = builder.AddCompletionQueue();
@@ -347,17 +355,30 @@ void Run(std::string xclbinFilename) {
   }
 
   service.ikern = 0;
-  std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on port: " << address << std::endl;
-  int server_id=1;
-  server->Wait();
+  std::vector<std::thread> th_vec;
+  for (unsigned int it = 0; it < num_servers; it++) {
+      std::unique_ptr<Server> server(builders[it].BuildAndStart());
+      std::thread th(runWait, std::move(server));
+      th_vec.push_back(std::move(th));
+      std::cout << "Server listening on port: " << port+it << std::endl;
+  }
+  for (std::thread & th : th_vec)
+  {
+      if (th.joinable())
+      th.join();
+  }
+  //server->Wait();
 }
 
 int main(int argc, char** argv) {
 
   std::string xclbinFilename = "";
+  int port = 5001;
+  unsigned int num_servers = 1;
   if (argc>1) xclbinFilename = argv[1];
-  Run(xclbinFilename);
+  if (argc>2) port = std::atoi(argv[2]);
+  if (argc>3) num_servers = std::atoi(argv[3]);
+  Run(xclbinFilename,port,num_servers);
 
   return 0;
 }
