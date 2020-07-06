@@ -46,6 +46,9 @@ typedef std::chrono::system_clock SClock;
 #include <thread>
 #include <sstream>
 
+#define NUM_CU 4
+#define NBUFFER 8
+
 #define STRINGIFY2(var) #var
 #define STRINGIFY(var) STRINGIFY2(var)
 
@@ -196,7 +199,7 @@ class fpgaObj {
       mtx.lock();
       //i = rand() % 1;
       i = ikern++;
-      if (ikern==4*NBUFFER) ikern = 0;
+      if (ikern==NUM_CU*NBUFFER) ikern = 0;
       first = isFirstRun[i];
       if (first) isFirstRun[i]=false;
       mtx.unlock();
@@ -230,10 +233,10 @@ class fpgaObj {
     
         for (int i = 0 ; i < nevents ; i++){
             t0 = Clock::now();
-            //int ikern = i%4;
+            //int ikern = i%NUM_CU;
             auto ikf = get_info_lock();
             int ikb = ikf.first;
-            int ik = ikb%4;
+            int ik = ikb%NUM_CU;
             bool firstRun = ikf.second;
             //for (int istream = 0; istream < COMPSTREAMSIZE; istream++) {
             //    source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
@@ -314,7 +317,7 @@ class fpgaObj {
 
   private:
     mutable std::mutex mtx;
-    mutable std::mutex mtxi[4*NBUFFER];
+    mutable std::mutex mtxi[NUM_CU*NBUFFER];
     //mutable std::mutex mtx0;
     //mutable std::mutex mtx1;
     //mutable std::mutex mtx2;
@@ -347,20 +350,20 @@ int main(int argc, char** argv)
     // its own host side buffer. So it is recommended to use this allocator if user wish to
     // create buffer using CL_MEM_USE_HOST_PTR to align user buffer to page boundary. It will 
     // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
-    //std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in(STREAMSIZE*4);
-    //std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_hw_results(COMPSTREAMSIZE*4);
+    //std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in(STREAMSIZE*NUM_CU);
+    //std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_hw_results(COMPSTREAMSIZE*NUM_CU);
     fpgaObj fpga;
     fpga.nevents = nevents;
     fpga.ikern = 0;
-    fpga.source_in.reserve(STREAMSIZE*4*NBUFFER);
-    fpga.source_hw_results.reserve(COMPSTREAMSIZE*4*NBUFFER);
+    fpga.source_in.reserve(STREAMSIZE*NUM_CU*NBUFFER);
+    fpga.source_hw_results.reserve(COMPSTREAMSIZE*NUM_CU*NBUFFER);
     
 
     //initialize
-    for(int j = 0 ; j < STREAMSIZE*4*NBUFFER ; j++){
+    for(int j = 0 ; j < STREAMSIZE*NUM_CU*NBUFFER ; j++){
         fpga.source_in[j] = 0;
     }
-    for(int j = 0 ; j < COMPSTREAMSIZE*4*NBUFFER ; j++){
+    for(int j = 0 ; j < COMPSTREAMSIZE*NUM_CU*NBUFFER ; j++){
         fpga.source_hw_results[j] = 0;
     }
 
@@ -371,7 +374,7 @@ int main(int argc, char** argv)
     cl::Device device = devices[0];
 
     cl::Context context(device);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_CU; i++) {
         cl::CommandQueue q_tmp(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
         fpga.q.push_back(q_tmp);
     }
@@ -396,7 +399,7 @@ int main(int argc, char** argv)
     fpga.program = tmp_program;
 
     for (int ib = 0; ib < NBUFFER; ib++) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < NUM_CU; i++) {
             std::string cu_id = std::to_string(i);
             std::string krnl_name_full =
                 "alveo_hls4ml:{alveo_hls4ml_" + cu_id + "}";
@@ -415,13 +418,13 @@ int main(int argc, char** argv)
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
     // Device-to-host communication
     
-    fpga.writeList.reserve(4*NBUFFER);
-    fpga.kernList.reserve(4*NBUFFER);
-    fpga.readList.reserve(4*NBUFFER);
+    fpga.writeList.reserve(NUM_CU*NBUFFER);
+    fpga.kernList.reserve(NUM_CU*NBUFFER);
+    fpga.readList.reserve(NUM_CU*NBUFFER);
     for (int ib = 0; ib < NBUFFER; ib++) {
-        for (int ik = 0; ik < 4; ik++) {
-            cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, fpga.source_in.data()+((ib*4+ik) * STREAMSIZE));
-            cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, fpga.source_hw_results.data()+((ib*4+ik) * COMPSTREAMSIZE));
+        for (int ik = 0; ik < NUM_CU; ik++) {
+            cl::Buffer buffer_in_tmp    (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,   vector_size_in_bytes, fpga.source_in.data()+((ib*NUM_CU+ik) * STREAMSIZE));
+            cl::Buffer buffer_out_tmp(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_out_bytes, fpga.source_hw_results.data()+((ib*NUM_CU+ik) * COMPSTREAMSIZE));
             fpga.buffer_in.push_back(buffer_in_tmp);
             fpga.buffer_out.push_back(buffer_out_tmp);
         
@@ -433,8 +436,8 @@ int main(int argc, char** argv)
             //fpga.read_event.push_back(tmp_read);
         
             int narg = 0;
-            fpga.krnl_xil[ib*4+ik].setArg(narg++, fpga.buffer_in[ib*4+ik]);
-            fpga.krnl_xil[ib*4+ik].setArg(narg++, fpga.buffer_out[ib*4+ik]);
+            fpga.krnl_xil[ib*NUM_CU+ik].setArg(narg++, fpga.buffer_in[ib*NUM_CU+ik]);
+            fpga.krnl_xil[ib*NUM_CU+ik].setArg(narg++, fpga.buffer_out[ib*NUM_CU+ik]);
             fpga.isFirstRun.push_back(true);
             std::vector<cl::Event> tmp_write_vec(1);
             std::vector<cl::Event> tmp_kern_vec(1);
@@ -453,10 +456,10 @@ int main(int argc, char** argv)
     auto t3 = Clock::now();
 
     for (int ib = 0; ib < NBUFFER; ib++) {
-        for (int i = 0 ; i < 4 ; i++){
+        for (int i = 0 ; i < NUM_CU ; i++){
             for (int istream = 0; istream < STREAMSIZE; istream++) {
             // Create the test data if no data files found or if end of files has been reached
-      	        fpga.source_in[ib*4*STREAMSIZE+i*STREAMSIZE+istream] = (bigdata_t)(12354.37674*(istream+STREAMSIZE*(ib+i+1)));
+      	        fpga.source_in[ib*NUM_CU*STREAMSIZE+i*STREAMSIZE+istream] = (bigdata_t)(12354.37674*(istream+STREAMSIZE*(ib+i+1)));
             }
         }
     }
@@ -485,7 +488,7 @@ int main(int argc, char** argv)
     auto ts4 = SClock::now();
     print_nanoseconds("       done:  ",ts4, 0);
 
-    for (int i = 0 ; i < 4 ; i++){
+    for (int i = 0 ; i < NUM_CU ; i++){
         OCL_CHECK(fpga.err, fpga.err = fpga.q[i].flush());
         OCL_CHECK(fpga.err, fpga.err = fpga.q[i].finish());
     }
