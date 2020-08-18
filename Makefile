@@ -1,24 +1,16 @@
 #note the compile for below needs to be pointed in the right direction
 LDFLAGS = -Wl,-rpath,/usr/local/lib\
- -L/usr/local/lib -L/home/pharris/grpc/cmake/build/ -L/home/pharris/grpc/cmake/build/third_party/cares/cares/lib/ -L/home/pharris/grpc/cmake/build/third_party/abseil-cpp/absl/types/ \
- -L/home/pharris/grpc/cmake/build/third_party/boringssl-with-bazel/ \
- -L/home/pharris/grpc/cmake/build/third_party/abseil-cpp/absl/base/ \
- -L/home/pharris/grpc/cmake/build/third_party/abseil-cpp/absl/strings/ \
- -L/home/pharris/grpc/cmake/build/third_party/abseil-cpp/absl/types \
- -L/home/pharris/grpc/cmake/build/third_party/abseil-cpp/absl/numeric \
- -L/home/pharris/grpc/cmake/build/third_party/abseil-cpp/absl/time \
+ -L/usr/local/lib \
  -lgrpc++_unsecure -lgrpc -lupb -lprotobuf -lpthread -lgrpc_unsecure -lgpr \
- -lcares -lgrpc_plugin_support -lssl -lcrypto  -lz \
- -labsl_bad_variant_access -labsl_strings -labsl_base -labsl_throw_delegate -labsl_str_format_internal -labsl_strings_internal -labsl_bad_optional_access -labsl_bad_any_cast_impl -labsl_int128 -labsl_raw_logging_internal \
- $(opencl_LDFLAGS) -labsl_time -labsl_time_zone \
+ -lcares -lgrpc_plugin_support -lssl -lcrypto  -lz -labsl_strings -labsl_base -labsl_throw_delegate \
+ $(opencl_LDFLAGS)\
  -lnsl -laddress_sorting -ldl -lm
 
 COMMON_REPO := ./hls4ml_c/
 
-include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
-#include $(COMMON_REPO)/utility/rules.mk
+
 
 HLS4ML_PROJ_TYPE := DENSE
 
