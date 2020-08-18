@@ -189,7 +189,6 @@ class fpgaObj {
     std::vector<cl::Buffer> buffer_out;
     std::vector<cl::Event>   write_event;
     std::vector<cl::Event>   kern_event;
-    //std::vector<cl::Event>   read_event;
     std::vector<bool> isFirstRun;
     cl_int err;
 
@@ -197,7 +196,6 @@ class fpgaObj {
       int i;
       bool first;
       mtx.lock();
-      //i = rand() % 1;
       i = ikern++;
       if (ikern==NUM_CU*NBUFFER) ikern = 0;
       first = isFirstRun[i];
@@ -233,14 +231,10 @@ class fpgaObj {
     
         for (int i = 0 ; i < nevents ; i++){
             t0 = Clock::now();
-            //int ikern = i%NUM_CU;
             auto ikf = get_info_lock();
             int ikb = ikf.first;
             int ik = ikb%NUM_CU;
             bool firstRun = ikf.second;
-            //for (int istream = 0; istream < COMPSTREAMSIZE; istream++) {
-            //    source_hw_results[(ikern)*COMPSTREAMSIZE+istream/COMPRESSION] = 0;
-            //}
 
             memcpy(source_in.data()+ikb*STREAMSIZE, &lFVals[0], STREAMSIZE*sizeof(bigdata_t));
     
@@ -289,20 +283,6 @@ class fpgaObj {
             print_nanoseconds("       finish:  ",ts2, ik, ss);
             t2 = Clock::now();
     
-            /*if (valid_data && !hit_end) {
-                std::cout<<"Predictions: \n";
-                for (int j = 0 ; j < STREAMSIZE ; j++){
-                    for (int k = 0 ; k < DATA_SIZE_OUT ; k++){
-            	        std::cout << pr[j*DATA_SIZE_OUT + k] << " \t";
-                    }
-                }
-                std::cout << std::endl;
-            }*/
-            //std::cout<<"Quantized predictions: \n";
-            //for (int j = 0 ; j < COMPSTREAMSIZE ; j++){
-            //    std::cout << source_hw_results[(ik)*COMPSTREAMSIZE+j] << " ";
-            //}
-            //std::cout << std::endl;
             t3 = Clock::now();
             //std::cout << " Prep time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
             //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
@@ -318,10 +298,6 @@ class fpgaObj {
   private:
     mutable std::mutex mtx;
     mutable std::mutex mtxi[NUM_CU*NBUFFER];
-    //mutable std::mutex mtx0;
-    //mutable std::mutex mtx1;
-    //mutable std::mutex mtx2;
-    //mutable std::mutex mtx3;
     mutable std::mutex smtx;
 };
 
@@ -433,7 +409,6 @@ int main(int argc, char** argv)
             cl::Event tmp_read = cl::Event();
             fpga.write_event.push_back(tmp_write);
             fpga.kern_event.push_back(tmp_kern);
-            //fpga.read_event.push_back(tmp_read);
         
             int narg = 0;
             fpga.krnl_xil[ib*NUM_CU+ik].setArg(narg++, fpga.buffer_in[ib*NUM_CU+ik]);
@@ -484,7 +459,6 @@ int main(int argc, char** argv)
     th5.join();
     th6.join();
     th7.join();
-    //FPGA(std::ref(fpga));
     auto ts4 = SClock::now();
     print_nanoseconds("       done:  ",ts4, 0);
 

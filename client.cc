@@ -66,10 +66,8 @@ public:
     for (int it = 0; it < ntest; it++) {
       grpc::ClientContext context;
       InferResponse response;
-      //context.set_compression_algorithm(GRPC_COMPRESS_DEFLATE);
       grpc::Status status = stub_->Infer(&context,request,&response);
       bool ok = status.ok();
-    //std::cout<<status.error_message()<<std::endl;
       if(ok){
         //uintptr_t run_index = response.meta_data().id();
         //tmp2 = response.raw_output(0);
@@ -92,29 +90,17 @@ void submit(GRPCServiceClient& client) {
     std::string &raw = response;
     const void* lVals = raw.c_str();
     bigdata_t* lFVals = (bigdata_t*) lVals;
-    //std::cout << "Answer received: " << a << " * " << b << " = " << lFVals[0] << std::endl;
 }
 
 void Run(int ntest, int nthreads, int port) {
-  //std::string address_base("localhost:");
-  std::string address_base("34.220.173.87:");
-  //std::string address_base("54.203.154.29:");
+  std::string address_base("localhost:");
   std::string address = address_base + std::to_string(port);
-  //std::string address("ailab01.fnal.gov:8001");
-  // Set the default compression algorithm for the channel.
-  //args.SetCompressionAlgorithm(GRPC_COMPRESS_DEFLATE);
   std::vector<GRPCServiceClient> clients;
   for (int it = 0; it < nthreads; it++) {
       ChannelArguments args;
       args.SetMaxSendMessageSize(100000000+it);
       GRPCServiceClient client(grpc::CreateCustomChannel(
           address, grpc::InsecureChannelCredentials(), args));
-      /*GRPCServiceClient client(
-                        grpc::CreateChannel(
-                                            address, 
-                                            grpc::InsecureChannelCredentials()
-                                            )
-                        );*/
 
       client.ntest = ntest;
       client.lTVals = new data_t[32*STREAMSIZE];

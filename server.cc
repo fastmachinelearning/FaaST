@@ -55,7 +55,6 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
   std::vector<cl::Buffer> buffer_out;
   std::vector<cl::Event>   write_event;
   std::vector<cl::Event>   kern_event;
-  //std::vector<cl::Event>   read_event;
   std::mutex mtx;
   std::mutex mtxi_write[NUM_CU*NBUFFER];
 
@@ -115,13 +114,11 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
 		     StatusResponse* reply
 		     ) override {
 
-    //std::cout << "In Status" << std::endl;
     auto server_status = reply->mutable_server_status();
     server_status->set_id("inference:0");
     auto& model_status  = *server_status->mutable_model_status();
     auto config = model_status["facile"].mutable_config();
     config->set_max_batch_size(1600000);
-    //Hcal config
     config->set_name("facile");
     auto input = config->add_input();
     input->set_name("input");
@@ -147,16 +144,11 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     int ikb = ikf.first;
     int ik = ikb%NUM_CU;
     bool firstRun = ikf.second;
-    //std::cout<<"Running kernel "<<ik<<"... first run? ("<<firstRun<<")"<<std::endl;
     auto ts1_ = SClock::now();
-    //print_nanoseconds("   in Infer  ",ts1_, ikb);
-    //std::cout<<request->meta_data().batch_size()<<std::endl;
     const std::string& raw = request->raw_input(0);
     const void* lVals = raw.c_str();
     data_t* lFVals = (data_t*) lVals;
-    //output array that is equal to ninputs(15)*batch flot is 4 bytes
     unsigned batch_size = raw.size()/32/sizeof(data_t);
-    //std::cout<<raw.size()<<std::endl;
     reply->mutable_request_status()->set_code(RequestStatusCode::SUCCESS);
     reply->mutable_request_status()->set_server_id("inference:0");
     reply->mutable_meta_data()->set_id(request->meta_data().id());
@@ -220,7 +212,6 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     auto t2 = Clock::now();
     auto ts2 = SClock::now();
     //print_nanoseconds("       finish:  ",ts2, ik);
-    //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
 
     //Finally deal with the ouputs
     std::string *outputs1 = reply->add_raw_output();
@@ -255,14 +246,6 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
       builders[is].SetMaxMessageSize(10000000);
       builders[is].RegisterService(&service);
   }
-  //All the crap that trt inference server runs
-  //std::unique_ptr<grpc::ServerCompletionQueue> health_cq = builder.AddCompletionQueue();
-  //std::unique_ptr<grpc::ServerCompletionQueue> status_cq = builder.AddCompletionQueue();
-  //std::unique_ptr<grpc::ServerCompletionQueue> repository_cq   = builder.AddCompletionQueue();
-  //std::unique_ptr<grpc::ServerCompletionQueue> infer_cq        = builder.AddCompletionQueue();
-  //std::unique_ptr<grpc::ServerCompletionQueue> stream_infer_cq = builder.AddCompletionQueue();
-  //std::unique_ptr<grpc::ServerCompletionQueue> modelcontrol_cq = builder.AddCompletionQueue();
-  //std::unique_ptr<grpc::ServerCompletionQueue> shmcontrol_cq   = builder.AddCompletionQueue();
 
   size_t vector_size_in_bytes  = sizeof(bigdata_t) * STREAMSIZE;
   size_t vector_size_out_bytes = sizeof(bigdata_t) * COMPSTREAMSIZE;
@@ -339,7 +322,6 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
       cl::Event tmp_read = cl::Event();
       service.write_event.push_back(tmp_write);
       service.kern_event.push_back(tmp_kern);
-      //service.read_event.push_back(tmp_read);
   
       int narg = 0;
       service.krnl_xil[ib*NUM_CU+ik].setArg(narg++, service.buffer_in[ib*NUM_CU+ik]);
@@ -367,7 +349,6 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
       if (th.joinable())
       th.join();
   }
-  //server->Wait();
 }
 
 int main(int argc, char** argv) {
