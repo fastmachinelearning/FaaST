@@ -1,0 +1,1664 @@
+<ENTRY>
+{
+ "session": {
+  "name": "v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2",
+  "pid": "0",
+  "uuid": "7ab4b478-0931-4a97-8af1-fea2f0bfc2bb",
+  "description": "",
+  "timestamp": "0",
+  "outputFiles": [
+   {
+    "type": "JSON",
+    "mode": "CLIENT_ONLY",
+    "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/.tlog/v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xtl",
+    "continuous": true
+   },
+   {
+    "type": "JSON",
+    "mode": "LOCAL_IF_NO_CONNECT",
+    "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin.link_summary",
+    "continuous": true
+   },
+   {
+    "type": "BINARY_PROTOBUF",
+    "mode": "LOCAL_IF_NO_CONNECT",
+    "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin.link_summary.pb",
+    "continuous": true
+   }
+  ]
+ },
+ "thisFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin.link_summary",
+ "connectId": "",
+ "serverToken": "",
+ "timestamp": "0"
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_CmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:04 2020",
+ "timestampMillis": "1584811924597",
+ "buildStep": {
+  "cmdId": "29f015e0-22f0-440f-bd82-fa0fa1b13b41",
+  "name": "v++",
+  "logFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/link.steps.log",
+  "commandLine": "/tools/xilinx/Vitis/2019.2/bin/unwrapped/lnx64.o/v++  --xp \"vivado_prop:run.__KERNEL__.{STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS}={-directive sdx_optimization_effort_high}\" --xp \"misc:report=type report_timing_summary name impl_report_timing_summary_route_design_summary steps {route_design} runs {impl_1} options {-max_paths 10}\" --xp \"misc:report=type report_timing_summary name impl_report_timing_summary_post_route_phys_opt_design_summary steps {post_route_phys_opt_design} runs {impl_1} options {-max_paths 10}\" -l --xp param:compiler.preserveHlsOutput=1 --xp param:compiler.generateExtraRunData=true -s -o xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin -t hw --platform xilinx_u250_xdma_201830_2 xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo ",
+  "args": [
+   "-l",
+   "--xp",
+   "param:compiler.preserveHlsOutput=1",
+   "--xp",
+   "param:compiler.generateExtraRunData=true",
+   "-s",
+   "-o",
+   "xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin",
+   "-t",
+   "hw",
+   "--platform",
+   "xilinx_u250_xdma_201830_2",
+   "xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:04 2020",
+ "timestampMillis": "1584811924598",
+ "status": {
+  "cmdId": "29f015e0-22f0-440f-bd82-fa0fa1b13b41",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_FlowMetaData",
+ "dateTimestamp": "Sat Mar 21 12:32:16 2020",
+ "timestampMillis": "1584811936929",
+ "buildSummary": {
+  "hardwarePlatform": "xilinx_u250_xdma_201830_2.xpfm",
+  "hardwareDsa": "xilinx_u250_xdma_201830_2.dsa",
+  "platformDirectory": "/opt/xilinx/platforms/xilinx_u250_xdma_201830_2",
+  "runtime": "OpenCL",
+  "systemConfig": "Linux",
+  "flow": "BF_LINK",
+  "target": "TT_HW",
+  "binaryContainer": {
+   "base": {
+    "type": "BT_UKNOWN",
+    "name": "alveo_hls4ml.hw.xilinx_u250_xdma_201830_2",
+    "file": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin",
+    "reports": []
+   },
+   "kernels": []
+  },
+  "kernels": [
+   {
+    "base": {
+     "type": "KERNEL",
+     "name": "alveo_hls4ml",
+     "file": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo",
+     "reports": []
+    },
+    "sources": [
+     "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xo/alveo_hls4ml/alveo_hls4ml/cpu_sources/ereg_v1.cpp",
+     "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xo/alveo_hls4ml/alveo_hls4ml/cpu_sources/alveo_hls4ml.cpp"
+    ],
+    "cuNames": [
+     "alveo_hls4ml_1"
+    ]
+   }
+  ]
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:17 2020",
+ "timestampMillis": "1584811937278",
+ "buildStep": {
+  "cmdId": "9c05461a-3b70-4267-a528-01466eee671a",
+  "name": "system_link",
+  "logFile": "",
+  "commandLine": "system_link --xo /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo -keep --xpfm /opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm --target hw --output_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int --temp_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/sys_link",
+  "args": [
+   "--xo",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo",
+   "-keep",
+   "--xpfm",
+   "/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm",
+   "--target",
+   "hw",
+   "--output_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int",
+   "--temp_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/sys_link"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:17 2020",
+ "timestampMillis": "1584811937279",
+ "status": {
+  "cmdId": "9c05461a-3b70-4267-a528-01466eee671a",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:32 2020",
+ "timestampMillis": "1584811952783",
+ "status": {
+  "cmdId": "9c05461a-3b70-4267-a528-01466eee671a",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:32 2020",
+ "timestampMillis": "1584811952787",
+ "buildStep": {
+  "cmdId": "f7da3907-9f55-4732-8d6e-76bc00a54e99",
+  "name": "cf2sw",
+  "logFile": "",
+  "commandLine": "cf2sw -sdsl /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/sdsl.dat -rtd /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/cf2sw.rtd -xclbin /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xclbin_orig.xml -o /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xclbin_orig.1.xml",
+  "args": [
+   "-sdsl",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/sdsl.dat",
+   "-rtd",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/cf2sw.rtd",
+   "-xclbin",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xclbin_orig.xml",
+   "-o",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xclbin_orig.1.xml"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:32 2020",
+ "timestampMillis": "1584811952789",
+ "status": {
+  "cmdId": "f7da3907-9f55-4732-8d6e-76bc00a54e99",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:34 2020",
+ "timestampMillis": "1584811954905",
+ "status": {
+  "cmdId": "f7da3907-9f55-4732-8d6e-76bc00a54e99",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:34 2020",
+ "timestampMillis": "1584811954908",
+ "buildStep": {
+  "cmdId": "3bff0725-30c9-4558-91dd-319a4373387d",
+  "name": "rtd2_system_diagram",
+  "logFile": "",
+  "commandLine": "rtd2SystemDiagram --rtdJsonFileName /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/cf2sw.rtd --diagramJsonFileName /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModel.json --platformFilePath /opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm --generatedByName v++ --generatedByVersion 2019.2 --generatedByChangeList 2700185 --generatedByTimeStamp Thu Oct 24 18:45:48 MDT 2019 --generatedByOptions /tools/xilinx/Vitis/2019.2/bin/unwrapped/lnx64.o/v++ -l --xp param:compiler.preserveHlsOutput=1 --xp param:compiler.generateExtraRunData=true -s -o xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin -t hw --platform xilinx_u250_xdma_201830_2 xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo  --generatedByXclbinName alveo_hls4ml.hw.xilinx_u250_xdma_201830_2 --kernelInfoDataFileName /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/kernel_info.dat",
+  "args": [
+   "--rtdJsonFileName",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/cf2sw.rtd",
+   "--diagramJsonFileName",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModel.json",
+   "--platformFilePath",
+   "/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm",
+   "--generatedByName",
+   "v++",
+   "--generatedByVersion",
+   "2019.2",
+   "--generatedByChangeList",
+   "2700185",
+   "--generatedByTimeStamp",
+   "Thu Oct 24 18:45:48 MDT 2019",
+   "--generatedByOptions",
+   "/tools/xilinx/Vitis/2019.2/bin/unwrapped/lnx64.o/v++ -l --xp param:compiler.preserveHlsOutput=1 --xp param:compiler.generateExtraRunData=true -s -o xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin -t hw --platform xilinx_u250_xdma_201830_2 xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo ",
+   "--generatedByXclbinName",
+   "alveo_hls4ml.hw.xilinx_u250_xdma_201830_2",
+   "--kernelInfoDataFileName",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/kernel_info.dat"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:34 2020",
+ "timestampMillis": "1584811954910",
+ "status": {
+  "cmdId": "3bff0725-30c9-4558-91dd-319a4373387d",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:37 2020",
+ "timestampMillis": "1584811957286",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModel.json",
+  "name": "",
+  "fileType": "JSON",
+  "reportType": "SYSTEM_DIAGRAM"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:37 2020",
+ "timestampMillis": "1584811957297",
+ "status": {
+  "cmdId": "3bff0725-30c9-4558-91dd-319a4373387d",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:37 2020",
+ "timestampMillis": "1584811957300",
+ "buildStep": {
+  "cmdId": "26e0d04d-ce6a-48ef-b35c-8eb63f5b2167",
+  "name": "vpl",
+  "logFile": "",
+  "commandLine": "vpl -t hw -f xilinx_u250_xdma_201830_2 -s --output_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int --log_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/logs/link --report_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link --config /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/vplConfig.ini -k /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/kernel_info.dat --webtalk_flag Vitis --temp_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link --no-info --tlog_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/.tlog/v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2 --iprepo /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xo/ip_repo/xilinx_com_hls_alveo_hls4ml_1_0 --messageDb /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/run_link/vpl.pb /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/dr.bd.tcl",
+  "args": [
+   "-t",
+   "hw",
+   "-f",
+   "xilinx_u250_xdma_201830_2",
+   "-s",
+   "--output_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int",
+   "--log_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/logs/link",
+   "--report_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link",
+   "--config",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/vplConfig.ini",
+   "-k",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/kernel_info.dat",
+   "--webtalk_flag",
+   "Vitis",
+   "--temp_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link",
+   "--no-info",
+   "--tlog_dir",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/.tlog/v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2",
+   "--iprepo",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xo/ip_repo/xilinx_com_hls_alveo_hls4ml_1_0",
+   "--messageDb",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/run_link/vpl.pb",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/dr.bd.tcl"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:37 2020",
+ "timestampMillis": "1584811957302",
+ "status": {
+  "cmdId": "26e0d04d-ce6a-48ef-b35c-8eb63f5b2167",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_CmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:39 2020",
+ "timestampMillis": "1584811959501",
+ "buildStep": {
+  "cmdId": "647825dc-930a-4615-82cd-0b47c687e901",
+  "name": "vpl",
+  "logFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/link.steps.log",
+  "commandLine": "/tools/xilinx/Vitis/2019.2/bin/unwrapped/lnx64.o/vpl -t hw -f xilinx_u250_xdma_201830_2 -s --output_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int --log_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/logs/link --report_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link --config /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/vplConfig.ini -k /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/kernel_info.dat --webtalk_flag Vitis --temp_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link --no-info --tlog_dir /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/.tlog/v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2 --iprepo /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xo/ip_repo/xilinx_com_hls_alveo_hls4ml_1_0 --messageDb /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/run_link/vpl.pb /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/dr.bd.tcl ",
+  "args": [],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:39 2020",
+ "timestampMillis": "1584811959501",
+ "status": {
+  "cmdId": "647825dc-930a-4615-82cd-0b47c687e901",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 12:32:55 2020",
+ "timestampMillis": "1584811975461",
+ "buildStep": {
+  "cmdId": "24f50d09-6e64-4029-8c97-93c4639455bd",
+  "name": "vivado",
+  "logFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/vivado/vpl/vivado.log",
+  "commandLine": "vivado -log vivado.log -applog -m64 -messageDb vivado.pb -mode batch -source vpl.tcl -notrace",
+  "args": [
+   "-log",
+   "vivado.log",
+   "-applog",
+   " -m64",
+   "-messageDb",
+   "vivado.pb",
+   "-mode",
+   "batch",
+   "-source",
+   "vpl.tcl",
+   "-notrace"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:55 2020",
+ "timestampMillis": "1584811975462",
+ "status": {
+  "cmdId": "24f50d09-6e64-4029-8c97-93c4639455bd",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 13:42:01 2020",
+ "timestampMillis": "1584816121705",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/vivado/vpl/output/systemDiagramModel_synthed.json",
+  "name": "",
+  "fileType": "JSON",
+  "reportType": "SYSTEM_DIAGRAM_PLUS"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 14:39:46 2020",
+ "timestampMillis": "1584819586022",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/vivado/vpl/output/systemDiagramModel_placed.json",
+  "name": "",
+  "fileType": "JSON",
+  "reportType": "SYSTEM_DIAGRAM_PLUS"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:23:54 2020",
+ "timestampMillis": "1584822234044",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/vivado/vpl/output/systemDiagramModel_routed.json",
+  "name": "",
+  "fileType": "JSON",
+  "reportType": "SYSTEM_DIAGRAM_PLUS"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406177",
+ "status": {
+  "cmdId": "24f50d09-6e64-4029-8c97-93c4639455bd",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406301",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/imp/kernel_util_synthed.xutil",
+  "name": "",
+  "fileType": "XUTIL",
+  "reportType": "GLOBAL_UTILIZATION_SYNTHESIS"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406302",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/imp/kernel_util_placed.xutil",
+  "name": "",
+  "fileType": "XUTIL",
+  "reportType": "GLOBAL_UTILIZATION_PLACEMENT"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406303",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/imp/kernel_util_placed.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_UTILIZATION_PLACEMENT"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406304",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/imp/kernel_util_routed.xutil",
+  "name": "",
+  "fileType": "XUTIL",
+  "reportType": "GLOBAL_UTILIZATION_ROUTE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406304",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/imp/kernel_util_routed.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_UTILIZATION_ROUTE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406337",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_gpio_null_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406337",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_data_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406338",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406338",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel2_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406339",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_cdc_data_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406339",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_user_slrcrossing_si_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406340",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_vip_data_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406340",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_regslice_data_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406341",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_control_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406341",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_user_slrcrossing_mi_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406342",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_debug_bridge_xsdbm_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406342",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_cdc_data_1_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406343",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel2_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406343",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406344",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_data_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406344",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_control_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406345",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_regslice_data_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406345",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_regslice_control_mgntpf_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406346",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_freq_counter_0_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406346",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_vip_ctrl_userpf_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406347",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_cdc_data_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406347",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_memory_subsystem_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406348",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_regslice_periph_null_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406348",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_logic_reset_op_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406349",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_xbar_4_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406349",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_regslice_data_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406350",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_control_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406350",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_data_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406350",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406351",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel2_2_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406351",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_axi_cdc_data_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406352",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_regslice_data_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406352",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_control_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406353",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_data_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406353",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406354",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_psreset_gate_pr_kernel2_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406354",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_xbar_5_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406355",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_xbar_3_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406355",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_ebbe_lut_buffer_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406355",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_alveo_hls4ml_1_0_utilization_synth.rpt",
+  "name": "alveo_hls4ml",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406356",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_xbar_6_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406356",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_ebbe_xsdbm_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406357",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_vip_ui_clk_DDR4_MEM00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406357",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_vip_ui_rst_DDR4_MEM00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406358",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_vip_ctrl_DDR4_MEM00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406358",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_psr_ddr4_mem00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406359",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_ddr4_mem00_ctrl_cc_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406359",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_calib_reduce_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406359",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_psr_ctrl_interconnect_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406360",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_interconnect_ddrmem_ctrl_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406360",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_vip_DDR4_MEM00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406361",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_vip_S00_AXI_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406361",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_vip_S04_AXI_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406362",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_ddr4_mem00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406362",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_auto_cc_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406363",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_m00_regslice_8_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406363",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_m01_regslice_8_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406363",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_s00_regslice_18_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406364",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/pfm_dynamic_m00_regslice_7_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406365",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_psr_aclk_SLR0_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406365",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/syn/bd_d216_interconnect_DDR4_MEM00_0_utilization_synth.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_UTILIZATION"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406381",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/imp/xilinx_u250_xdma_201830_2_bb_locked_timing_summary_routed.rpt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_REPORT_TIMING_SUMMARY"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406473",
+ "status": {
+  "cmdId": "647825dc-930a-4615-82cd-0b47c687e901",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406504",
+ "status": {
+  "cmdId": "26e0d04d-ce6a-48ef-b35c-8eb63f5b2167",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406509",
+ "buildStep": {
+  "cmdId": "3d4b1139-c734-4730-9086-8fc3dfe9b7c4",
+  "name": "rtdgen",
+  "logFile": "",
+  "commandLine": "rtdgen",
+  "args": [],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406510",
+ "status": {
+  "cmdId": "3d4b1139-c734-4730-9086-8fc3dfe9b7c4",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406545",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_xml.rtd",
+  "name": "",
+  "fileType": "JSON",
+  "reportType": "XCLBIN_INFO"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406548",
+ "buildStep": {
+  "cmdId": "55995921-1e9c-4760-98e6-4784593cb4aa",
+  "name": "cf2sw",
+  "logFile": "",
+  "commandLine": "cf2sw -a /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/address_map.xml -sdsl /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/sdsl.dat -xclbin /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xclbin_orig.xml -rtd /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.rtd -o /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xml",
+  "args": [
+   "-a",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/address_map.xml",
+   "-sdsl",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/sdsl.dat",
+   "-xclbin",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/xclbin_orig.xml",
+   "-rtd",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.rtd",
+   "-o",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xml"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:26 2020",
+ "timestampMillis": "1584823406549",
+ "status": {
+  "cmdId": "55995921-1e9c-4760-98e6-4784593cb4aa",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:28 2020",
+ "timestampMillis": "1584823408488",
+ "status": {
+  "cmdId": "55995921-1e9c-4760-98e6-4784593cb4aa",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 15:43:28 2020",
+ "timestampMillis": "1584823408489",
+ "buildStep": {
+  "cmdId": "6804bfe8-0a96-416f-93b3-549963c3edec",
+  "name": "rtd2_system_diagram",
+  "logFile": "",
+  "commandLine": "rtd2SystemDiagram --rtdJsonFileName /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.rtd --diagramJsonFileName /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModel_resource_use.json --diagramWithAddressesAndSlrsJsonFileName /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModelSlrBaseAddress.json",
+  "args": [
+   "--rtdJsonFileName",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.rtd",
+   "--diagramJsonFileName",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModel_resource_use.json",
+   "--diagramWithAddressesAndSlrsJsonFileName",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModelSlrBaseAddress.json"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:28 2020",
+ "timestampMillis": "1584823408491",
+ "status": {
+  "cmdId": "6804bfe8-0a96-416f-93b3-549963c3edec",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410709",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModelSlrBaseAddress.json",
+  "name": "",
+  "fileType": "JSON",
+  "reportType": "SYSTEM_DIAGRAM_PLUS"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410719",
+ "status": {
+  "cmdId": "6804bfe8-0a96-416f-93b3-549963c3edec",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410720",
+ "status": {
+  "cmdId": "3d4b1139-c734-4730-9086-8fc3dfe9b7c4",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410725",
+ "buildStep": {
+  "cmdId": "fc199eee-b9d7-4b6f-a4b9-0c196b2c17f9",
+  "name": "xclbinutil",
+  "logFile": "",
+  "commandLine": "xclbinutil --add-section DEBUG_IP_LAYOUT:JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/debug_ip_layout.rtd --add-section BITSTREAM:RAW:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/partial.bit --force --key-value SYS:mode:hw_pr --add-section :JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.rtd --append-section :JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/appendSection.rtd --add-section CLOCK_FREQ_TOPOLOGY:JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_xml.rtd --add-section BUILD_METADATA:JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_build.rtd --add-section EMBEDDED_METADATA:RAW:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xml --add-section SYSTEM_METADATA:RAW:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModelSlrBaseAddress.json --output /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin",
+  "args": [
+   "--add-section",
+   "DEBUG_IP_LAYOUT:JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/debug_ip_layout.rtd",
+   "--add-section",
+   "BITSTREAM:RAW:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/partial.bit",
+   "--force",
+   "--key-value",
+   "SYS:mode:hw_pr",
+   "--add-section",
+   ":JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.rtd",
+   "--append-section",
+   ":JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/appendSection.rtd",
+   "--add-section",
+   "CLOCK_FREQ_TOPOLOGY:JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_xml.rtd",
+   "--add-section",
+   "BUILD_METADATA:JSON:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_build.rtd",
+   "--add-section",
+   "EMBEDDED_METADATA:RAW:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xml",
+   "--add-section",
+   "SYSTEM_METADATA:RAW:/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/systemDiagramModelSlrBaseAddress.json",
+   "--output",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410727",
+ "status": {
+  "cmdId": "fc199eee-b9d7-4b6f-a4b9-0c196b2c17f9",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410872",
+ "status": {
+  "cmdId": "fc199eee-b9d7-4b6f-a4b9-0c196b2c17f9",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410879",
+ "buildStep": {
+  "cmdId": "c0438c92-782d-4434-ae58-161a3f344c83",
+  "name": "xclbinutilinfo",
+  "logFile": "",
+  "commandLine": "xclbinutil --quiet --info /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin.info --input /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin",
+  "args": [
+   "--quiet",
+   "--info",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin.info",
+   "--input",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/link/int/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xclbin"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:30 2020",
+ "timestampMillis": "1584823410881",
+ "status": {
+  "cmdId": "c0438c92-782d-4434-ae58-161a3f344c83",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:31 2020",
+ "timestampMillis": "1584823411580",
+ "status": {
+  "cmdId": "c0438c92-782d-4434-ae58-161a3f344c83",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:31 2020",
+ "timestampMillis": "1584823411629",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/system_estimate_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xtxt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_SYSTEM_ESTIMATE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:31 2020",
+ "timestampMillis": "1584823411812",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/link/v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_guidance.html",
+  "name": "",
+  "fileType": "HTML",
+  "reportType": "GLOBAL_RULECHECK_GUIDANCE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:31 2020",
+ "timestampMillis": "1584823411813",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/v++_link_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_guidance.pb",
+  "name": "",
+  "fileType": "BINARY_PROTOBUF",
+  "reportType": "GLOBAL_RULECHECK_GUIDANCE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 15:43:31 2020",
+ "timestampMillis": "1584823411987",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/logs/optraceViewer.html",
+  "name": "",
+  "fileType": "HTML",
+  "reportType": "OPERATION_TRACE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 15:43:31 2020",
+ "timestampMillis": "1584823411988",
+ "status": {
+  "cmdId": "29f015e0-22f0-440f-bd82-fa0fa1b13b41",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>

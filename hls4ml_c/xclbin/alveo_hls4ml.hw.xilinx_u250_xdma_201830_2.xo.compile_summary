@@ -1,0 +1,264 @@
+<ENTRY>
+{
+ "session": {
+  "name": "v++_compile_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2",
+  "pid": "0",
+  "uuid": "ff5e7c41-3b05-4667-8937-3cc8c0304e5b",
+  "description": "",
+  "timestamp": "0",
+  "outputFiles": [
+   {
+    "type": "JSON",
+    "mode": "CLIENT_ONLY",
+    "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/.tlog/v++_compile_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xtl",
+    "continuous": true
+   },
+   {
+    "type": "JSON",
+    "mode": "LOCAL_IF_NO_CONNECT",
+    "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo.compile_summary",
+    "continuous": true
+   },
+   {
+    "type": "BINARY_PROTOBUF",
+    "mode": "LOCAL_IF_NO_CONNECT",
+    "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo.compile_summary.pb",
+    "continuous": true
+   }
+  ]
+ },
+ "thisFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo.compile_summary",
+ "connectId": "",
+ "serverToken": "",
+ "timestamp": "0"
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_CmdStep",
+ "dateTimestamp": "Sat Mar 21 11:10:53 2020",
+ "timestampMillis": "1584807053708",
+ "buildStep": {
+  "cmdId": "6493fbd5-525f-4221-92f3-a63c18143687",
+  "name": "v++",
+  "logFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.steps.log",
+  "commandLine": "/tools/xilinx/Vitis/2019.2/bin/unwrapped/lnx64.o/v++  --xp \"vivado_prop:run.__KERNEL__.{STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS}={-directive sdx_optimization_effort_high}\" --xp \"misc:report=type report_timing_summary name impl_report_timing_summary_route_design_summary steps {route_design} runs {impl_1} options {-max_paths 10}\" --xp \"misc:report=type report_timing_summary name impl_report_timing_summary_post_route_phys_opt_design_summary steps {post_route_phys_opt_design} runs {impl_1} options {-max_paths 10}\" -c --xp param:compiler.preserveHlsOutput=1 --xp param:compiler.generateExtraRunData=true -s -k alveo_hls4ml -DMYPROJ=ereg_v1 -DIS_DENSE -DWEIGHTS_DIR=./src/weights/ -I./src/ -I./src/weights/ -I./src/nnet_utils/ --xp prop:solution.hls_pre_tcl=./config.tcl --xp prop:kernel.alveo_hls4ml.kernel_flags=-std=c++11 -o xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo -t hw --platform xilinx_u250_xdma_201830_2 ./src/alveo_hls4ml.cpp src/ereg_v1.cpp ",
+  "args": [
+   "-c",
+   "--xp",
+   "param:compiler.preserveHlsOutput=1",
+   "--xp",
+   "param:compiler.generateExtraRunData=true",
+   "-s",
+   "-k",
+   "alveo_hls4ml",
+   "-DMYPROJ=ereg_v1",
+   "-DIS_DENSE",
+   "-DWEIGHTS_DIR=./src/weights/",
+   "-I./src/",
+   "-I./src/weights/",
+   "-I./src/nnet_utils/",
+   "--xp",
+   "prop:solution.hls_pre_tcl=./config.tcl",
+   "--xp",
+   "prop:kernel.alveo_hls4ml.kernel_flags=-std=c++11",
+   "-o",
+   "xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo",
+   "-t",
+   "hw",
+   "--platform",
+   "xilinx_u250_xdma_201830_2",
+   "./src/alveo_hls4ml.cpp",
+   "src/ereg_v1.cpp"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 11:10:53 2020",
+ "timestampMillis": "1584807053708",
+ "status": {
+  "cmdId": "6493fbd5-525f-4221-92f3-a63c18143687",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_FlowMetaData",
+ "dateTimestamp": "Sat Mar 21 11:11:06 2020",
+ "timestampMillis": "1584807066682",
+ "buildSummary": {
+  "hardwarePlatform": "xilinx_u250_xdma_201830_2.xpfm",
+  "hardwareDsa": "xilinx_u250_xdma_201830_2.dsa",
+  "platformDirectory": "/opt/xilinx/platforms/xilinx_u250_xdma_201830_2",
+  "runtime": "OpenCL",
+  "systemConfig": "Linux",
+  "flow": "BF_COMPILE",
+  "target": "TT_HW",
+  "kernels": [
+   {
+    "base": {
+     "type": "KERNEL",
+     "name": "alveo_hls4ml",
+     "file": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/xclbin/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xo",
+     "reports": []
+    },
+    "sources": [
+     "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/src/alveo_hls4ml.cpp",
+     "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/src/ereg_v1.cpp"
+    ],
+    "cuNames": []
+   }
+  ]
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_SubCmdStep",
+ "dateTimestamp": "Sat Mar 21 11:11:06 2020",
+ "timestampMillis": "1584807066691",
+ "buildStep": {
+  "cmdId": "7b13fe19-0050-4ad4-8bca-e75ff9a97f92",
+  "name": "vivado_hls",
+  "logFile": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml/vivado_hls.log",
+  "commandLine": "vivado_hls -f /storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml/alveo_hls4ml.tcl -messageDb vivado_hls.pb",
+  "args": [
+   "vivado_hls",
+   "-f",
+   "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml/alveo_hls4ml.tcl",
+   "-messageDb",
+   "vivado_hls.pb"
+  ],
+  "iniFiles": []
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 11:11:06 2020",
+ "timestampMillis": "1584807066693",
+ "status": {
+  "cmdId": "7b13fe19-0050-4ad4-8bca-e75ff9a97f92",
+  "state": "CS_RUNNING"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:01 2020",
+ "timestampMillis": "1584811921674",
+ "status": {
+  "cmdId": "7b13fe19-0050-4ad4-8bca-e75ff9a97f92",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:01 2020",
+ "timestampMillis": "1584811921749",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml/alveo_hls4ml/solution/.autopilot/db/alveo_hls4ml.design.xml",
+  "name": "alveo_hls4ml",
+  "fileType": "XML",
+  "reportType": "KERNEL_HLS_REPORT"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:01 2020",
+ "timestampMillis": "1584811921750",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml/alveo_hls4ml/solution/.autopilot/db/.message_syn.xml",
+  "name": "alveo_hls4ml",
+  "fileType": "XML",
+  "reportType": "KERNEL_HLS_DRC_SYNTHESIS"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:01 2020",
+ "timestampMillis": "1584811921753",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/hls_reports/alveo_hls4ml_csynth.rpt",
+  "name": "alveo_hls4ml",
+  "fileType": "TEXT",
+  "reportType": "KERNEL_HLS_CSYNTH"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:01 2020",
+ "timestampMillis": "1584811921753",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/alveo_hls4ml/alveo_hls4ml/solution/syn/report/alveo_hls4ml_csynth.xml",
+  "name": "alveo_hls4ml",
+  "fileType": "XML",
+  "reportType": "KERNEL_HLS_CSYNTH"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:01 2020",
+ "timestampMillis": "1584811921789",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/system_estimate_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2.xtxt",
+  "name": "",
+  "fileType": "TEXT",
+  "reportType": "GLOBAL_SYSTEM_ESTIMATE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:02 2020",
+ "timestampMillis": "1584811922180",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/reports/alveo_hls4ml.hw.xilinx_u250_xdma_201830_2/v++_compile_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_guidance.html",
+  "name": "",
+  "fileType": "HTML",
+  "reportType": "GLOBAL_RULECHECK_GUIDANCE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Report",
+ "dateTimestamp": "Sat Mar 21 12:32:02 2020",
+ "timestampMillis": "1584811922182",
+ "report": {
+  "path": "/storage/local/data1/home/pharris/grpc/examples/grpc-trt-fgpa/hls4ml_c/_x/v++_compile_alveo_hls4ml.hw.xilinx_u250_xdma_201830_2_guidance.pb",
+  "name": "",
+  "fileType": "BINARY_PROTOBUF",
+  "reportType": "GLOBAL_RULECHECK_GUIDANCE"
+ }
+}
+</ENTRY>
+<ENTRY>
+{
+ "type": "ET_Status",
+ "dateTimestamp": "Sat Mar 21 12:32:02 2020",
+ "timestampMillis": "1584811922183",
+ "status": {
+  "cmdId": "6493fbd5-525f-4221-92f3-a63c18143687",
+  "state": "CS_PASSED"
+ }
+}
+</ENTRY>
