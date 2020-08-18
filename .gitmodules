@@ -1,4 +1,0 @@
-[submodule "hls4ml_c"]
-	path = hls4ml_c
-	url = https://github.com/drankincms/hls4ml_c.git
-	branch = hcal_model_alveo
