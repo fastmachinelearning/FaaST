@@ -1,5 +1,7 @@
 # FaaST Server for FACILE
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3992376.svg)](https://doi.org/10.5281/zenodo.3992376)
+
 Setup Instructions:
 
 ```
