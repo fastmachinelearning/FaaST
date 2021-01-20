@@ -16,9 +16,9 @@ typedef std::chrono::system_clock SClock;
 #include <vector>
 
 #include <grpcpp/grpcpp.h>
-#include "grpc_service.grpc.pb.h"
-#include "request_status.grpc.pb.h"
-#include "model_config.pb.h"
+#include <grpc/impl/codegen/status.h>
+#include "grpc_service_v2.grpc.pb.h"
+#include "model_config_v2.pb.h"
 
 #include "kernel_params.h"
 
@@ -28,17 +28,20 @@ typedef std::chrono::system_clock SClock;
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerCompletionQueue;
 using grpc::Status;
+using grpc::StatusCode;
 
-using nvidia::inferenceserver::GRPCService;
-using nvidia::inferenceserver::InferRequest;
-using nvidia::inferenceserver::InferResponse;
-using nvidia::inferenceserver::StatusRequest;
-using nvidia::inferenceserver::StatusResponse;
-using nvidia::inferenceserver::RequestStatusCode;
-using nvidia::inferenceserver::DataType;
+using inference::GRPCInferenceService;
+using inference::ModelInferRequest;
+using inference::ModelInferResponse;
+using inference::ModelConfigRequest;
+using inference::ModelConfigResponse;
+using inference::ModelMetadataRequest;
+using inference::ModelMetadataResponse;
+using inference::DataType;
 
-class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCService::Service {
+class GRPCServiceImplementation final : public inference::GRPCInferenceService::Service {
 
  public:
   std::vector<bigdata_t,aligned_allocator<bigdata_t>> source_in;
@@ -108,58 +111,70 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
           << nanoseconds.count() << std::endl;
   }
 
-  grpc::Status Status(
-		     ServerContext* context, 
-		     const StatusRequest* request, 
-		     StatusResponse* reply
-		     ) override {
-
-    auto server_status = reply->mutable_server_status();
-    server_status->set_id("inference:0");
-    auto& model_status  = *server_status->mutable_model_status();
-    auto config = model_status["facile"].mutable_config();
-    config->set_max_batch_size(1600000);
-    config->set_name("facile");
-    auto input = config->add_input();
-    input->set_name("input");
-    input->set_data_type(DataType::TYPE_UINT16);
-    input->add_dims(32);
-    auto output = config->add_output();
-    output->set_name("output/BiasAdd");
-    output->set_data_type(DataType::TYPE_UINT16);
-    output->add_dims(1);
-    reply->mutable_request_status()->set_code(RequestStatusCode::SUCCESS);
-    nvidia::inferenceserver::RequestStatus request_status = reply->request_status();
-    nvidia::inferenceserver::ServerStatus  check_server_status  = reply->server_status();
-    return grpc::Status::OK;
+  grpc::Status ModelConfig(ServerContext* context,
+                           const ModelConfigRequest* request,
+                           ModelConfigResponse* reply) override {
+    //std::cout<<"In Config"<<std::endl;
+    if (request->name()=="facile_all_v2") {
+      auto config = reply->mutable_config();
+      config->set_name(request->name());
+      config->set_max_batch_size(16384);
+      return grpc::Status::OK;
+    }
+    else {
+      return grpc::Status::CANCELLED;
+    }
   }
 
-  grpc::Status Infer(
+  grpc::Status ModelMetadata(ServerContext* context,
+                           const ModelMetadataRequest* request,
+                           ModelMetadataResponse* reply) override {
+    //std::cout<<"In Metadata"<<std::endl;
+    if (request->name()=="facile_all_v2") {
+      reply->set_name(request->name());
+      reply->add_versions(request->version());
+      auto input = reply->add_inputs();
+      input->set_name("input_DataConverter:FloatApFixed16F6Converter"); //designed to allowpassing of desired data converter
+      input->set_datatype("UINT16");
+      input->add_shape(-1);
+      input->add_shape(32);
+      auto output = reply->add_outputs();
+      output->set_name("output_DataConverter:FloatApFixed16F6Converter"); //designed to allowpassing of desired data converter
+      output->set_datatype("UINT16");
+      output->add_shape(-1);
+      output->add_shape(1);
+      return grpc::Status::OK;
+    }
+    else {
+      return grpc::Status::CANCELLED;
+    }
+  }
+
+  grpc::Status ModelInfer(
 		     ServerContext* context, 
-		     const InferRequest* request, 
-		     InferResponse* reply
+		     const ModelInferRequest* request, 
+		     ModelInferResponse* reply
 		     ) override {
+    //std::cout<<"In Infer"<<std::endl;
     auto t0 = Clock::now();
     auto ikf = get_info_lock();
     int ikb = ikf.first;
     int ik = ikb%NUM_CU;
     bool firstRun = ikf.second;
+    //std::cout<<"Running kernel "<<ik<<"... first run? ("<<firstRun<<")"<<std::endl;
     auto ts1_ = SClock::now();
-    const std::string& raw = request->raw_input(0);
+    //print_nanoseconds("   in Infer  ",ts1_, ikb);
+    const std::string& raw = request->raw_input_contents(0);
     const void* lVals = raw.c_str();
     data_t* lFVals = (data_t*) lVals;
     unsigned batch_size = raw.size()/32/sizeof(data_t);
-    reply->mutable_request_status()->set_code(RequestStatusCode::SUCCESS);
-    reply->mutable_request_status()->set_server_id("inference:0");
-    reply->mutable_meta_data()->set_id(request->meta_data().id());
-    reply->mutable_meta_data()->set_model_version(-1);
-    reply->mutable_meta_data()->set_batch_size(batch_size);
+
+    reply->set_id(request->id());
+    reply->set_model_version("");
 
     //setup output (this is critical)
-    auto output1 = reply->mutable_meta_data()->add_output();
-    output1->set_name("output/BiasAdd");
-    output1->mutable_raw()->mutable_dims()->Add(1);
-    output1->mutable_raw()->set_batch_byte_size(sizeof(data_t)*batch_size);
+    auto output1 = reply->add_outputs();
+    output1->set_name("output");
 
 
     auto ts1p = SClock::now();
@@ -168,6 +183,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     auto ts1 = SClock::now();
     //print_nanoseconds("       start:   ",ts1, ik);
     memcpy(source_in.data()+ikb*STREAMSIZE, &lFVals[0], batch_size*sizeof(bigdata_t));
+
     auto t1 = Clock::now();
     auto ts1a = SClock::now();
     //print_nanoseconds("   memcpy  ",ts1a, ikb);
@@ -183,7 +199,7 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
                                              NULL,
                                              &(write_event[ikb])));
     auto ts1c = SClock::now();
-   // print_nanoseconds("       write:   ",ts1c, ik);
+    //print_nanoseconds("       write:   ",ts1c, ik);
     
     writeList[ikb].clear();
     writeList[ikb].push_back(write_event[ikb]);
@@ -212,13 +228,16 @@ class GRPCServiceImplementation final : public nvidia::inferenceserver::GRPCServ
     auto t2 = Clock::now();
     auto ts2 = SClock::now();
     //print_nanoseconds("       finish:  ",ts2, ik);
+    //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
 
     //Finally deal with the ouputs
-    std::string *outputs1 = reply->add_raw_output();
+    std::string *outputs1 = reply->add_raw_output_contents();
     char* lTVals = new char[batch_size*sizeof(data_t)];
     memcpy(&lTVals[0], source_hw_results.data()+(ikb*COMPSTREAMSIZE), (batch_size)*sizeof(data_t));
     outputs1->append(lTVals,(batch_size)*sizeof(data_t));
+
     delete[] lTVals;
+
     auto ts1g = SClock::now();
     //print_nanoseconds("   finish  ",ts1g, ikb);
 
@@ -338,6 +357,7 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
 
   service.ikern = 0;
   std::vector<std::thread> th_vec;
+
   for (unsigned int it = 0; it < num_servers; it++) {
       std::unique_ptr<Server> server(builders[it].BuildAndStart());
       std::thread th(runWait, std::move(server));
@@ -349,9 +369,11 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
       if (th.joinable())
       th.join();
   }
+  //server->Wait();
 }
 
 int main(int argc, char** argv) {
+
 
   std::string xclbinFilename = "";
   int port = 5001;

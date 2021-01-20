@@ -31,8 +31,9 @@ xcl2.o: $(xcl2_SRCS) $(xcl2_HDRS)
 client: api.pb.o model_config.pb.o request_status.pb.o server_status.pb.o grpc_service.pb.o api.grpc.pb.o model_config.grpc.pb.o request_status.grpc.pb.o server_status.grpc.pb.o grpc_service.grpc.pb.o client.o xcl2.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-server: api.pb.o model_config.pb.o request_status.pb.o server_status.pb.o grpc_service.pb.o api.grpc.pb.o model_config.grpc.pb.o request_status.grpc.pb.o server_status.grpc.pb.o grpc_service.grpc.pb.o server.o xcl2.o
+server: model_config_v2.pb.o grpc_service_v2.pb.o model_config_v2.grpc.pb.o grpc_service_v2.grpc.pb.o server.o xcl2.o
 	$(CXX) $^ $(LDFLAGS) -o $@
+
 
 %.grpc.pb.cc: %.proto
 	protoc --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
