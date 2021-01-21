@@ -79,6 +79,8 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
     mtxi_write[ik].unlock();
   }
 
+  unsigned int verbosity = 0;
+
  private:
 
   cl_int err;
@@ -114,7 +116,8 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
   grpc::Status ModelConfig(ServerContext* context,
                            const ModelConfigRequest* request,
                            ModelConfigResponse* reply) override {
-    //std::cout<<"In Config"<<std::endl;
+    if (verbosity>1)
+      std::cout<<"In Config"<<std::endl;
     if (request->name()=="facile_all_v2") {
       auto config = reply->mutable_config();
       config->set_name(request->name());
@@ -129,17 +132,22 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
   grpc::Status ModelMetadata(ServerContext* context,
                            const ModelMetadataRequest* request,
                            ModelMetadataResponse* reply) override {
-    //std::cout<<"In Metadata"<<std::endl;
+    if (verbosity>1) 
+      std::cout<<"In Metadata"<<std::endl;
     if (request->name()=="facile_all_v2") {
+      std::string conv_prefix = "_DataConverter:";
+      std::string converter = "FloatApFixed16F6Converter";
       reply->set_name(request->name());
       reply->add_versions(request->version());
       auto input = reply->add_inputs();
-      input->set_name("input_DataConverter:FloatApFixed16F6Converter"); //designed to allowpassing of desired data converter
+      input->set_name("input");
+      input->set_name(input->name()+conv_prefix+converter); //designed to allow passing of desired data converter
       input->set_datatype("UINT16");
       input->add_shape(-1);
       input->add_shape(32);
       auto output = reply->add_outputs();
-      output->set_name("output_DataConverter:FloatApFixed16F6Converter"); //designed to allowpassing of desired data converter
+      output->set_name("output");
+      output->set_name(output->name()+conv_prefix+converter); //designed to allow passing of desired data converter
       output->set_datatype("UINT16");
       output->add_shape(-1);
       output->add_shape(1);
@@ -155,15 +163,18 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
 		     const ModelInferRequest* request, 
 		     ModelInferResponse* reply
 		     ) override {
-    //std::cout<<"In Infer"<<std::endl;
+    if (verbosity>1) 
+      std::cout<<"In Infer"<<std::endl;
     auto t0 = Clock::now();
     auto ikf = get_info_lock();
     int ikb = ikf.first;
     int ik = ikb%NUM_CU;
     bool firstRun = ikf.second;
-    //std::cout<<"Running kernel "<<ik<<"... first run? ("<<firstRun<<")"<<std::endl;
     auto ts1_ = SClock::now();
-    //print_nanoseconds("   in Infer  ",ts1_, ikb);
+    if (verbosity>2) {
+      std::cout<<"Running kernel "<<ik<<"... first run? ("<<firstRun<<")"<<std::endl;
+      print_nanoseconds("   in Infer  ",ts1_, ikb);
+    }
     const std::string& raw = request->raw_input_contents(0);
     const void* lVals = raw.c_str();
     data_t* lFVals = (data_t*) lVals;
@@ -178,20 +189,24 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
 
 
     auto ts1p = SClock::now();
-    //print_nanoseconds("   pre-lock  ",ts1p, ikb);
+    if (verbosity>2)
+      print_nanoseconds("   pre-lock  ",ts1p, ikb);
     get_ilock_write(ikb);
     auto ts1 = SClock::now();
-    //print_nanoseconds("       start:   ",ts1, ik);
+    if (verbosity>2)
+      print_nanoseconds("       start:   ",ts1, ik);
     memcpy(source_in.data()+ikb*STREAMSIZE, &lFVals[0], batch_size*sizeof(bigdata_t));
 
     auto t1 = Clock::now();
     auto ts1a = SClock::now();
-    //print_nanoseconds("   memcpy  ",ts1a, ikb);
+    if (verbosity>2)
+      print_nanoseconds("   memcpy  ",ts1a, ikb);
     if (!firstRun) {
         OCL_CHECK(err, err = kern_event[ikb].wait());
     }
     auto ts1b = SClock::now();
-    //print_nanoseconds("   kernwait  ",ts1b, ikb);
+    if (verbosity>2)
+      print_nanoseconds("   kernwait  ",ts1b, ikb);
     OCL_CHECK(err,
               err =
                   q[ik].enqueueMigrateMemObjects({buffer_in[ikb]},
@@ -199,7 +214,8 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
                                              NULL,
                                              &(write_event[ikb])));
     auto ts1c = SClock::now();
-    //print_nanoseconds("       write:   ",ts1c, ik);
+    if (verbosity>2)
+      print_nanoseconds("       write:   ",ts1c, ik);
     
     writeList[ikb].clear();
     writeList[ikb].push_back(write_event[ikb]);
@@ -208,7 +224,8 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
               err = q[ik].enqueueNDRangeKernel(
                   krnl_xil[ikb], 0, 1, 1, &(writeList[ikb]), &(kern_event[ikb])));
     auto ts1d = SClock::now();
-    //print_nanoseconds("      kernel:   ",ts1d, ik);
+    if (verbosity>2)
+      print_nanoseconds("      kernel:   ",ts1d, ik);
     kernList[ikb].clear();
     kernList[ikb].push_back(kern_event[ikb]);
     cl::Event read_event;
@@ -218,17 +235,21 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
                                                &(kernList[ikb]),
                                                &(read_event)));
     auto ts1e = SClock::now();
-    //print_nanoseconds("        read:   ",ts1e, ik);
+    if (verbosity>2)
+      print_nanoseconds("        read:   ",ts1e, ik);
 
     release_ilock_write(ikb);
     OCL_CHECK(err, err = kern_event[ikb].wait());
     OCL_CHECK(err, err = read_event.wait());
     auto ts1f = SClock::now();
-    //print_nanoseconds("   readwait  ",ts1f, ikb);
+    if (verbosity>2)
+      print_nanoseconds("   readwait  ",ts1f, ikb);
     auto t2 = Clock::now();
     auto ts2 = SClock::now();
-    //print_nanoseconds("       finish:  ",ts2, ik);
-    //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+    if (verbosity>2) {
+      print_nanoseconds("       finish:  ",ts2, ik);
+      std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+    }
 
     //Finally deal with the ouputs
     std::string *outputs1 = reply->add_raw_output_contents();
@@ -239,13 +260,16 @@ class GRPCServiceImplementation final : public inference::GRPCInferenceService::
     delete[] lTVals;
 
     auto ts1g = SClock::now();
-    //print_nanoseconds("   finish  ",ts1g, ikb);
+    if (verbosity>2)
+      print_nanoseconds("   finish  ",ts1g, ikb);
 
     auto t3 = Clock::now();
-    //std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
-    //std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
-    //std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " ns" << std::endl;
-    //std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+    if (verbosity>2) {
+      std::cout << "Total time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0).count() << " ns" << std::endl;
+      std::cout << "   T1 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() << " ns" << std::endl;
+      std::cout << "   T2 time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() << " ns" << std::endl;
+      std::cout << " FPGA time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " ns" << std::endl;
+    }
 
     return grpc::Status::OK;
   } 
@@ -255,8 +279,9 @@ void runWait(std::unique_ptr<Server> srv) {
     srv->Wait();
 }
 
-void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
+void Run(std::string xclbinFilename, int port, unsigned int num_servers, unsigned int verbosity) {
   GRPCServiceImplementation service;
+  service.verbosity = verbosity;
 
   ServerBuilder builders[num_servers];
   for (unsigned int is = 0; is < num_servers; is++) {
@@ -289,21 +314,24 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
     service.q.push_back(q_tmp);
   }
   std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
-  std::cout << "Found Device=" << device_name.c_str() << std::endl;
+  if (verbosity>0)
+    std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
   cl::Program::Binaries bins;
   // Load xclbin
   if (xclbinFilename != "") {
-    std::cout << "Loading: '" << xclbinFilename << "'\n";
+    if (verbosity>0)
+      std::cout << "Loading: '" << xclbinFilename << "'\n";
     std::ifstream bin_file(xclbinFilename, std::ifstream::binary);
     bin_file.seekg (0, bin_file.end);
     unsigned nb = bin_file.tellg();
     bin_file.seekg (0, bin_file.beg);
     char *buf = new char [nb];
     bin_file.read(buf, nb);
-    
+
     // Creating Program from Binary File
     bins.push_back({buf,nb});
+    
   } else {
     // find_binary_file() is a utility API which will search the xclbin file for
     // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
@@ -362,14 +390,14 @@ void Run(std::string xclbinFilename, int port, unsigned int num_servers) {
       std::unique_ptr<Server> server(builders[it].BuildAndStart());
       std::thread th(runWait, std::move(server));
       th_vec.push_back(std::move(th));
-      std::cout << "Server listening on port: " << port+it << std::endl;
+      if (verbosity>0) 
+        std::cout << "Server listening on port: " << port+it << std::endl;
   }
   for (std::thread & th : th_vec)
   {
       if (th.joinable())
       th.join();
   }
-  //server->Wait();
 }
 
 int main(int argc, char** argv) {
@@ -378,10 +406,12 @@ int main(int argc, char** argv) {
   std::string xclbinFilename = "";
   int port = 5001;
   unsigned int num_servers = 1;
+  unsigned int verbosity = 0;
   if (argc>1) xclbinFilename = argv[1];
   if (argc>2) port = std::atoi(argv[2]);
   if (argc>3) num_servers = std::atoi(argv[3]);
-  Run(xclbinFilename,port,num_servers);
+  if (argc>4) verbosity = std::atoi(argv[4]);
+  Run(xclbinFilename,port,num_servers,verbosity);
 
   return 0;
 }
