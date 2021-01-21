@@ -12,7 +12,7 @@ typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::system_clock SClock;
 
 #include <grpcpp/grpcpp.h>
-#include "grpc_service.grpc.pb.h"
+#include "grpc_service_v2.grpc.pb.h"
 
 #include "xcl2.hpp"
 #include <vector>
@@ -30,13 +30,13 @@ using grpc::ChannelArguments;
 using grpc::ClientContext;
 using grpc::Status;
 
-using nvidia::inferenceserver::GRPCService;
-using nvidia::inferenceserver::InferRequest;
-using nvidia::inferenceserver::InferResponse;
+using inference::GRPCInferenceService;
+using inference::ModelInferRequest;
+using inference::ModelInferResponse;
 
-class GRPCServiceClient {
+class GRPCInferenceServiceClient {
 public:
-  GRPCServiceClient(std::shared_ptr<Channel> channel) : stub_(GRPCService::NewStub(channel)) {}
+  GRPCInferenceServiceClient(std::shared_ptr<Channel> channel) : stub_(GRPCInferenceService::NewStub(channel)) {}
 
   int ntest;
 
@@ -47,30 +47,19 @@ public:
     char *tmp = (char*) lTVals;
     std::string tmp2 = "Success";
 
-    nvidia::inferenceserver::InferRequest request;
-    nvidia::inferenceserver::InferRequestHeader infer_request;
-    infer_request.mutable_input()->Clear();
-    infer_request.set_id(0);
-    auto rinput = infer_request.add_input();
-    rinput->set_name("facile");
-    rinput->add_dims(32);
-    rinput->set_batch_byte_size(sizeof(data_t)*32*STREAMSIZE);
-    request.Clear();
-    request.set_model_name("facile");
-    request.set_model_version(-1);
+    ModelInferRequest request;
+    request.set_model_name("facile_v2_all");
+    request.set_model_version("");
 
-    request.mutable_meta_data()->MergeFrom(infer_request);
-    std::string* new_input = request.add_raw_input();
+    std::string* new_input = request.add_raw_input_contents();
     new_input->append(tmp, sizeof(data_t)*32*STREAMSIZE);
 
     for (int it = 0; it < ntest; it++) {
       grpc::ClientContext context;
-      InferResponse response;
-      grpc::Status status = stub_->Infer(&context,request,&response);
+      ModelInferResponse response;
+      grpc::Status status = stub_->ModelInfer(&context,request,&response);
       bool ok = status.ok();
       if(ok){
-        //uintptr_t run_index = response.meta_data().id();
-        //tmp2 = response.raw_output(0);
       } else {
         std::cout<<"Failed"<<std::endl;
         return "Fail";
@@ -80,10 +69,10 @@ public:
   }
 
 private:
-  std::unique_ptr<GRPCService::Stub> stub_;
+  std::unique_ptr<GRPCInferenceService::Stub> stub_;
 };
 
-void submit(GRPCServiceClient& client) {
+void submit(GRPCInferenceServiceClient& client) {
     int a = 5; int b = 10;
     std::string response;
     client.sendRequest(a,b);
@@ -95,11 +84,11 @@ void submit(GRPCServiceClient& client) {
 void Run(int ntest, int nthreads, int port) {
   std::string address_base("localhost:");
   std::string address = address_base + std::to_string(port);
-  std::vector<GRPCServiceClient> clients;
+  std::vector<GRPCInferenceServiceClient> clients;
   for (int it = 0; it < nthreads; it++) {
       ChannelArguments args;
       args.SetMaxSendMessageSize(100000000+it);
-      GRPCServiceClient client(grpc::CreateCustomChannel(
+      GRPCInferenceServiceClient client(grpc::CreateCustomChannel(
           address, grpc::InsecureChannelCredentials(), args));
 
       client.ntest = ntest;
